@@ -469,17 +469,32 @@ h2 {
   opacity: 0.55;
 }
 
+#screen-quiz,
+#bossBattle {
+  padding-bottom: 24px;
+}
+
 .quiz-feedback {
-  margin-top: 20px;
-  padding: 20px;
+  margin-top: 16px;
+  padding: 18px;
   border-radius: 12px;
   display: none;
   line-height: 1.6;
 }
 
-.quiz-feedback.show { display: block; }
-.quiz-feedback.correct-fb { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); }
-.quiz-feedback.wrong-fb { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--error); }
+.quiz-feedback.show {
+  display: block;
+}
+
+.quiz-feedback.correct-fb {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--success);
+}
+
+.quiz-feedback.wrong-fb {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--error);
+}
 
 .feedback-title {
   font-size: 1.1rem;
@@ -488,7 +503,7 @@ h2 {
 }
 
 .feedback-answer {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   font-size: 0.95rem;
 }
 
@@ -496,15 +511,19 @@ h2 {
   font-size: 0.95rem;
   line-height: 1.55;
   color: var(--text);
+  margin-bottom: 14px;
 }
 
 .feedback-explain strong {
   color: var(--accent-light);
+  display: block;
+  margin-bottom: 4px;
 }
 
 .btn-next-question {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 4px;
+  min-height: 48px;
 }
 
 .match-header {
