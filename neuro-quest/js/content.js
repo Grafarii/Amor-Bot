@@ -197,7 +197,7 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "Afasia de Broca caracteriza-se por:", options: ["Fala fluente sem compreensão da fala","Fala não fluente, compreensão preservada","Perda total da audição bilateral","Perda total da visão binocular"], answer: 1, explain: "Broca afeta produção; compreensão geralmente está melhor preservada." },
+      { q: "Afasia de Broca caracteriza-se por:", options: ["Fala fluente, mas sem compreensão adequada", "Fala não fluente, compreensão preservada", "Perda total da audição bilateral profunda", "Perda total da visão binocular central"], answer: 1, explain: "Broca afeta produção; compreensão geralmente está melhor preservada." },
       { q: "A área de Wernicke está envolvida em:", options: ["Produção motora da fala","Compreensão da linguagem","Processamento visual primário","Controle do equilíbrio"], answer: 1, explain: "Wernicke processa a compreensão da linguagem falada e escrita." },
       { q: "Prosopagnosia é dificuldade em reconhecer:", options: ["Cores e tonalidades","Rostos de pessoas conhecidas","Sons ambientais complexos","Objetos pelo tato apenas"], answer: 1, explain: "Prosopagnosia = agnosia visual para rostos." },
       { q: "O SRAA (sistema reticular) está relacionado a:", options: ["Processamento visual primário","Vigília e atenção global","Processamento auditivo primário","Motricidade fina dos dedos"], answer: 1, explain: "O SRAA regula estados de alerta e vigília." },
