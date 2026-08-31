@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#ec4899">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProcessoQuest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Jogo educativo de Processos Psicológicos Básicos — 2º semestre de Psicologia">
+  <title>ProcessoQuest — Processos Psicológicos Básicos</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="particles"></div>
+
+  <header class="top-bar">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">ProcessoQuest</span>
+    </div>
+    <div class="player-stats" id="playerStats">
+      <div class="stat"><span class="stat-icon">⭐</span><span id="xpDisplay">0 XP</span></div>
+      <div class="stat"><span class="stat-icon">🏆</span><span id="levelDisplay">Nv. 1</span></div>
+      <div class="stat hearts"><span id="heartsDisplay">❤️❤️❤️</span></div>
+      <div class="stat"><span class="stat-icon">🔥</span><span id="streakDisplay">0</span></div>
+    </div>
+  </header>
+
+  <main id="app">
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <h1>Domine o 2º Semestre</h1>
+        <p class="subtitle">Processos Psicológicos Básicos — curso de Psicologia</p>
+        <div class="hero-brain">⚡</div>
+        <p class="hero-desc">Explore 8 processos mentais, aprenda com cartas interativas, vença desafios e derrote os chefes de cada unidade!</p>
+        <button class="btn btn-primary btn-lg" id="btnStart">Iniciar Aventura</button>
+        <button class="btn btn-secondary" id="btnContinue" style="display:none">Continuar Jornada</button>
+      </div>
+      <div class="achievements-preview" id="achievementsPreview"></div>
+    </section>
+
+    <section id="screen-map" class="screen">
+      <h2>Mapa Cognitivo</h2>
+      <p class="map-subtitle">Complete cada unidade para desbloquear a próxima</p>
+      <div class="world-map" id="worldMap"></div>
+      <div class="map-actions">
+        <button class="btn btn-secondary" id="btnReview">Modo Revisão</button>
+        <button class="btn btn-secondary" id="btnAchievements">Conquistas</button>
+        <button class="btn btn-secondary btn-reset-progress" id="btnResetProgress">Resetar progresso</button>
+      </div>
+    </section>
+
+    <section id="screen-lesson" class="screen">
+      <div class="lesson-header">
+        <button class="btn-back" id="btnBackLesson">← Voltar</button>
+        <span class="lesson-progress" id="lessonProgress"></span>
+      </div>
+      <div class="lesson-card" id="lessonCard"></div>
+      <div class="lesson-nav">
+        <button class="btn btn-secondary" id="btnPrevCard" disabled>Anterior</button>
+        <button class="btn btn-primary" id="btnNextCard">Próximo</button>
+      </div>
+    </section>
+
+    <section id="screen-quiz" class="screen">
+      <div class="quiz-header">
+        <button class="btn-back" id="btnBackQuiz">← Voltar</button>
+        <div class="quiz-info">
+          <span id="quizTitle"></span>
+          <span id="quizCounter"></span>
+        </div>
+        <div class="quiz-xp-bar"><div id="quizXpFill"></div></div>
+      </div>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </section>
+
+    <section id="screen-match" class="screen">
+      <div class="match-header">
+        <button class="btn-back" id="btnBackMatch">← Voltar</button>
+        <h3 id="matchTitle">Associe os Conceitos</h3>
+        <span id="matchScore">0/0</span>
+      </div>
+      <p class="match-instruction">Toque em um termo e depois no correspondente</p>
+      <div class="match-grid">
+        <div class="match-column" id="matchLeft"></div>
+        <div class="match-column" id="matchRight"></div>
+      </div>
+    </section>
+
+    <section id="screen-boss" class="screen">
+      <div class="boss-intro" id="bossIntro">
+        <div class="boss-sprite">🧩</div>
+        <h2 id="bossName">Chefe da Unidade</h2>
+        <p id="bossDesc"></p>
+        <button class="btn btn-primary btn-lg" id="btnFightBoss">Enfrentar!</button>
+      </div>
+      <div class="boss-battle" id="bossBattle" style="display:none">
+        <div class="boss-hp-bar">
+          <span>Chefe</span>
+          <div class="hp-track"><div id="bossHpFill"></div></div>
+        </div>
+        <div class="quiz-question" id="bossQuestion"></div>
+        <div class="quiz-options" id="bossOptions"></div>
+        <div class="quiz-feedback" id="bossFeedback"></div>
+      </div>
+      <div class="boss-victory" id="bossVictory" style="display:none">
+        <div class="victory-animation">🎉</div>
+        <h2>Unidade Concluída!</h2>
+        <p id="victoryMessage"></p>
+        <p class="xp-gained" id="victoryXp"></p>
+        <button class="btn btn-primary" id="btnVictoryContinue">Continuar</button>
+      </div>
+    </section>
+
+    <section id="screen-achievements" class="screen">
+      <button class="btn-back" id="btnBackAchievements">← Voltar</button>
+      <h2>Conquistas</h2>
+      <div class="achievements-grid" id="achievementsGrid"></div>
+    </section>
+
+    <section id="screen-review" class="screen">
+      <button class="btn-back" id="btnBackReview">← Voltar</button>
+      <h2>Modo Revisão</h2>
+      <p>Revise todo o conteúdo com flashcards aleatórios</p>
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner" id="flashcardInner">
+          <div class="flashcard-front" id="flashcardFront"></div>
+          <div class="flashcard-back" id="flashcardBack"></div>
+        </div>
+      </div>
+      <div class="flashcard-actions">
+        <button class="btn btn-secondary" id="btnFlipCard">Virar Carta</button>
+        <button class="btn btn-primary" id="btnNextFlash">Próxima</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/content.js?v=1"></script>
+  <script src="js/quiz-utils.js?v=1"></script>
+  <script src="js/game.js?v=1"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+      }).finally(() => {
+        navigator.serviceWorker.register('./sw.js?v=1').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

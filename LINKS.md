@@ -11,6 +11,7 @@ Deploy automático na branch `gh-pages` via GitHub Actions.
 | **NeuroQuest** | https://grafarii.github.io/Amor-Bot/neuro-quest/ |
 | **SocioQuest** | https://grafarii.github.io/Amor-Bot/psico-social-quest/ |
 | **MatrizQuest** | https://grafarii.github.io/Amor-Bot/matriz-quest/ |
+| **ProcessoQuest** | https://grafarii.github.io/Amor-Bot/processo-quest/ |
 
 ## Configuração do GitHub Pages
 
