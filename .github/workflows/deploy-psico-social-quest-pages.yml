@@ -1,0 +1,32 @@
+name: Deploy SocioQuest (gh-pages branch)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'psico-social-quest/**'
+      - '.github/workflows/deploy-psico-social-quest-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp -r psico-social-quest/. _site/
+          touch _site/.nojekyll
+
+      - name: Deploy to gh-pages-socio
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages-socio
+          force_orphan: true
