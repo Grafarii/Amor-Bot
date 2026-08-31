@@ -572,6 +572,22 @@ function flipFlashcard() {
   document.getElementById('flashcardInner').classList.toggle('flipped');
 }
 
+function resetProgress() {
+  if (!confirm('Tem certeza que deseja resetar? Todo o progresso, XP e conquistas serão apagados.')) {
+    return;
+  }
+
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  saveState();
+  updateStats();
+  renderAchievementsPreview();
+  renderAchievements();
+  document.getElementById('btnContinue').style.display = 'none';
+  showToast('Progresso resetado!');
+  showScreen('screen-home');
+}
+
 function hasProgress() {
   return state.units.some(u => u.lessonsDone || u.quizDone || u.progress > 0);
 }
@@ -634,6 +650,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMap();
     showScreen('screen-map');
   });
+
+  document.getElementById('btnResetProgress').addEventListener('click', resetProgress);
 
   document.getElementById('btnReview').addEventListener('click', startReview);
 
