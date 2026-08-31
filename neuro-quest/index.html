@@ -84,7 +84,6 @@
       <div class="quiz-question" id="quizQuestion"></div>
       <div class="quiz-options" id="quizOptions"></div>
       <div class="quiz-feedback" id="quizFeedback"></div>
-      <button class="btn btn-primary btn-next-question" id="btnNextQuestion" style="display:none">Próxima pergunta</button>
     </section>
 
     <!-- Matching -->
@@ -117,7 +116,6 @@
         <div class="quiz-question" id="bossQuestion"></div>
         <div class="quiz-options" id="bossOptions"></div>
         <div class="quiz-feedback" id="bossFeedback"></div>
-        <button class="btn btn-primary btn-next-question" id="btnNextBossQuestion" style="display:none">Próxima pergunta</button>
       </div>
       <div class="boss-victory" id="bossVictory" style="display:none">
         <div class="victory-animation">🎉</div>
@@ -155,12 +153,16 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="js/content.js"></script>
-  <script src="js/quiz-utils.js"></script>
-  <script src="js/game.js"></script>
+  <script src="js/content.js?v=7"></script>
+  <script src="js/quiz-utils.js?v=7"></script>
+  <script src="js/game.js?v=7"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+      }).finally(() => {
+        navigator.serviceWorker.register('./sw.js?v=7').catch(() => {});
+      });
     }
   </script>
 </body>
