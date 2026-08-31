@@ -1,0 +1,36 @@
+name: Deploy Jogos (gh-pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'neuro-quest/**'
+      - 'psico-social-quest/**'
+      - 'site/**'
+      - '.github/workflows/deploy-games-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare unified site
+        run: |
+          mkdir -p _site/neuro-quest _site/psico-social-quest
+          cp -r neuro-quest/. _site/neuro-quest/
+          cp -r psico-social-quest/. _site/psico-social-quest/
+          cp site/index.html _site/
+          touch _site/.nojekyll
+          rm -rf _site/neuro-quest/.vercel _site/psico-social-quest/.vercel 2>/dev/null || true
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
