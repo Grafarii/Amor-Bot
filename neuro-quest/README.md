@@ -4,13 +4,23 @@ Jogo educativo para aprender **Neurociências e Neuropsicologia** (2º semestre 
 
 ## Jogar no celular
 
-Acesse direto no navegador do celular:
+### Agora (link direto)
+**https://temporary-fast-flurry-2znl2t9.vercel.app**
 
-**https://grafarii.github.io/Amor-Bot/**
+Abra esse link no Chrome ou Safari do celular e comece a jogar.
 
-Para instalar como app na tela inicial:
+### URL permanente (recomendado)
+O site já está publicado na branch `gh-pages`. Para ativar a URL fixa:
+
+1. Acesse: https://github.com/Grafarii/Amor-Bot/settings/pages
+2. Em **Source**, escolha: Branch `gh-pages` → pasta `/ (root)`
+3. Salve e aguarde ~1 minuto
+
+Depois use: **https://grafarii.github.io/Amor-Bot/**
+
+### Instalar como app na tela inicial
 - **iPhone:** Safari → Compartilhar → "Adicionar à Tela de Início"
-- **Android:** Chrome → menu (⋮) → "Instalar app" ou "Adicionar à tela inicial"
+- **Android:** Chrome → menu (⋮) → "Instalar app"
 
 ## Como jogar
 
