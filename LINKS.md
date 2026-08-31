@@ -3,13 +3,14 @@
 Repositório público: **Grafarii/Amor-Bot**  
 Deploy automático na branch `gh-pages` via GitHub Actions.
 
-## Links oficiais (GitHub Pages — confirmado ✅)
+## Links oficiais (GitHub Pages)
 
 | Jogo | Link |
 |------|------|
-| **Menu com os dois jogos** | https://grafarii.github.io/Amor-Bot/ |
+| **Menu com todos os jogos** | https://grafarii.github.io/Amor-Bot/ |
 | **NeuroQuest** | https://grafarii.github.io/Amor-Bot/neuro-quest/ |
 | **SocioQuest** | https://grafarii.github.io/Amor-Bot/psico-social-quest/ |
+| **MatrizQuest** | https://grafarii.github.io/Amor-Bot/matriz-quest/ |
 
 ## Configuração do GitHub Pages
 
@@ -17,14 +18,6 @@ Deploy automático na branch `gh-pages` via GitHub Actions.
 2. **Source:** Deploy from a branch
 3. **Branch:** `gh-pages` | **Folder:** `/ (root)`
 4. Salvar
-
-## Links alternativos (githack)
-
-| Jogo | Link |
-|------|------|
-| Menu | https://raw.githack.com/Grafarii/Amor-Bot/gh-pages/index.html |
-| NeuroQuest | https://raw.githack.com/Grafarii/Amor-Bot/gh-pages/neuro-quest/index.html |
-| SocioQuest | https://raw.githack.com/Grafarii/Amor-Bot/gh-pages/psico-social-quest/index.html |
 
 ## Atualizações
 

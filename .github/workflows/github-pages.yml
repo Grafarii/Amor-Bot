@@ -6,6 +6,7 @@ on:
     paths:
       - 'neuro-quest/**'
       - 'psico-social-quest/**'
+      - 'matriz-quest/**'
       - 'site/**'
       - '.github/workflows/github-pages.yml'
   workflow_dispatch:
@@ -27,9 +28,10 @@ jobs:
 
       - name: Build site
         run: |
-          mkdir -p _site/neuro-quest _site/psico-social-quest
+          mkdir -p _site/neuro-quest _site/psico-social-quest _site/matriz-quest
           cp -r neuro-quest/. _site/neuro-quest/
           cp -r psico-social-quest/. _site/psico-social-quest/
+          cp -r matriz-quest/. _site/matriz-quest/
           cp site/index.html _site/
           touch _site/.nojekyll
 
