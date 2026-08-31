@@ -52,10 +52,10 @@ const UNITS = [
     ],
     quiz: [
       { q: "Qual lobo cerebral está mais associado às funções executivas e planejamento?", options: ["Occipital", "Frontal", "Temporal", "Parietal"], answer: 1, explain: "O lobo frontal, especialmente o córtex pré-frontal, é o centro das funções executivas." },
-      { q: "O tálamo funciona principalmente como:", options: ["Centro de memória", "Central de retransmissão sensorial", "Controle motor direto", "Processamento visual"], answer: 1, explain: "O tálamo recebe informações sensoriais e as direciona ao córtex apropriado." },
+      { q: "O tálamo funciona principalmente como:", options: ["Armazenamento da memória","Retransmissão sensorial central","Regulação motora direta","Processamento visual inicial"], answer: 1, explain: "O tálamo recebe informações sensoriais e as direciona ao córtex apropriado." },
       { q: "A área de Wernicke está localizada no lobo:", options: ["Frontal", "Parietal", "Temporal", "Occipital"], answer: 2, explain: "A área de Wernicke fica no lobo temporal esquerdo e é responsável pela compreensão da linguagem." },
-      { q: "Os gânglios da base estão envolvidos em:", options: ["Visão", "Modulação de movimentos", "Audição", "Equilíbrio exclusivamente"], answer: 1, explain: "Os gânglios da base iniciam e modulam movimentos voluntários." },
-      { q: "Phineas Gage teve lesão no lobo frontal, demonstrando relação entre:", options: ["Visão e occipital", "Personalidade e córtex frontal", "Memória e cerebelo", "Linguagem e parietal"], answer: 1, explain: "Após lesão frontal, Gage teve alterações marcantes de personalidade e comportamento." }
+      { q: "Os gânglios da base estão envolvidos em:", options: ["Processamento da visão","Modulação dos movimentos","Processamento da audição","Controle do equilíbrio postural"], answer: 1, explain: "Os gânglios da base iniciam e modulam movimentos voluntários." },
+      { q: "Phineas Gage teve lesão no lobo frontal, demonstrando relação entre:", options: ["Visão e lobo occipital posterior","Personalidade e córtex frontal","Memória e lobo temporal medial","Linguagem e lobo parietal superior"], answer: 1, explain: "Após lesão frontal, Gage teve alterações marcantes de personalidade e comportamento." }
     ],
     matching: [
       { term: "Lobo Frontal", match: "Funções executivas" },
@@ -68,11 +68,11 @@ const UNITS = [
       name: "Guardião Neural",
       desc: "Prove que domina os fundamentos das Neurociências!",
       questions: [
-        { q: "Qual estrutura NÃO é subcortical?", options: ["Amígdala", "Hipocampo", "Córtex pré-frontal", "Tálamo"], answer: 2, explain: "O córtex pré-frontal é cortical; amígdala, hipocampo e tálamo são subcorticais." },
-        { q: "A neurociência cognitiva estuda principalmente:", options: ["Apenas neuroanatomia", "Relação cérebro-cognição-comportamento", "Somente farmacologia", "Cirurgias cerebrais"], answer: 1, explain: "Integra neurobiologia com processos cognitivos e comportamentais." },
-        { q: "Luria contribuiu para:", options: ["Descoberta do DNA", "Neuropsicologia clínica sistemática", "Teoria behaviorista", "Eletroencefalografia"], answer: 1, explain: "Alexander Luria foi pioneiro na avaliação neuropsicológica clínica." },
-        { q: "O lobo parietal está associado a:", options: ["Audição primária", "Integração sensorial e atenção espacial", "Visão primária", "Produção de fala"], answer: 1, explain: "O parietal integra informações sensoriais e coordena atenção espacial." },
-        { q: "Circuitos córtico-subcorticais envolvem:", options: ["Apenas córtex", "Interação entre córtex e estruturas subcorticais", "Somente medula", "Apenas nervos periféricos"], answer: 1, explain: "Funções complexas dependem de loops entre córtex e subcorticais." }
+        { q: "Qual estrutura NÃO é subcortical?", options: ["Amígdala profunda","Hipocampo medial","Córtex pré-frontal","Tálamo dorsal"], answer: 2, explain: "O córtex pré-frontal é cortical; amígdala, hipocampo e tálamo são subcorticais." },
+        { q: "A neurociência cognitiva estuda principalmente:", options: ["Neuroanatomia estrutural do cérebro","Cérebro, cognição e comportamento","Farmacologia dos psicofármacos","Cirurgias do sistema nervoso central"], answer: 1, explain: "Integra neurobiologia com processos cognitivos e comportamentais." },
+        { q: "Luria contribuiu para:", options: ["Descoberta da estrutura do DNA","Neuropsicologia clínica sistemática","Teoria behaviorista radical clássica","Mapeamento eletroencefalográfico"], answer: 1, explain: "Alexander Luria foi pioneiro na avaliação neuropsicológica clínica." },
+        { q: "O lobo parietal está associado a:", options: ["Processamento auditivo primário","Integração sensorial e atenção","Processamento visual primário","Produção da fala articulada"], answer: 1, explain: "O parietal integra informações sensoriais e coordena atenção espacial." },
+        { q: "Circuitos córtico-subcorticais envolvem:", options: ["Apenas estruturas corticais","Interação córtex-subcortical","Somente vias da medula","Apenas nervos periféricos"], answer: 1, explain: "Funções complexas dependem de loops entre córtex e subcorticais." }
       ]
     }
   },
@@ -118,11 +118,11 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "A Resolução CFP nº 002/2004 reconhece a Neuropsicologia como:", options: ["Curso de medicina", "Especialidade do psicólogo", "Área da biologia", "Subcampo da fisioterapia"], answer: 1, explain: "A resolução oficializa a Neuropsicologia como especialidade profissional do psicólogo." },
+      { q: "A Resolução CFP nº 002/2004 reconhece a Neuropsicologia como:", options: ["Curso superior de medicina","Especialidade do psicólogo","Área da biologia molecular","Subcampo da fisioterapia"], answer: 1, explain: "A resolução oficializa a Neuropsicologia como especialidade profissional do psicólogo." },
       { q: "Phineas Gage teve lesão principalmente no:", options: ["Hipocampo", "Lobo frontal", "Cerebelo", "Occipital"], answer: 1, explain: "A barra de ferro lesionou o lobo frontal, alterando personalidade e comportamento." },
-      { q: "O paciente H.M. tinha amnésia:", options: ["Retrógrada apenas", "Anterógrada severa", "Inexistente", "Somente sensorial"], answer: 1, explain: "H.M. não conseguia formar novas memórias episódicas após a cirurgia." },
-      { q: "Alexander Luria é conhecido por:", options: ["Teoria freudiana", "Neuropsicologia clínica sistemática", "Behaviorismo", "Humanismo"], answer: 1, explain: "Luria desenvolveu abordagem sistêmico-dinâmica e baterias de avaliação." },
-      { q: "A neuropsicologia clínica tem como foco:", options: ["Apenas pesquisa básica", "Avaliação e reabilitação cognitiva", "Cirurgia cerebral", "Prescrição de medicamentos"], answer: 1, explain: "O neuropsicólogo clínico avalia, diagnostica e propõe reabilitação cognitiva." }
+      { q: "O paciente H.M. tinha amnésia:", options: ["Retrógrada isolada","Anterógrada severa","Totalmente inexistente","Apenas de estímulos sensoriais"], answer: 1, explain: "H.M. não conseguia formar novas memórias episódicas após a cirurgia." },
+      { q: "Alexander Luria é conhecido por:", options: ["Teoria psicanalítica freudiana clássica","Neuropsicologia clínica sistemática","Escola behaviorista clássica radical","Abordagem humanista integral clínica"], answer: 1, explain: "Luria desenvolveu abordagem sistêmico-dinâmica e baterias de avaliação." },
+      { q: "A neuropsicologia clínica tem como foco:", options: ["Pesquisa laboratorial básica","Avaliação e reabilitação cognitiva","Procedimentos cirúrgicos cerebrais","Prescrição de psicofármacos"], answer: 1, explain: "O neuropsicólogo clínico avalia, diagnostica e propõe reabilitação cognitiva." }
     ],
     matching: [
       { term: "Phineas Gage", match: "Lesão frontal / personalidade" },
@@ -135,11 +135,11 @@ const UNITS = [
       name: "Mestre Clínico",
       desc: "Demonstre domínio dos fundamentos da Neuropsicologia!",
       questions: [
-        { q: "A amnésia anterógrada significa dificuldade em:", options: ["Lembrar eventos passados", "Formar novas memórias", "Falar", "Ver"], answer: 1, explain: "Anterógrada = incapacidade de consolidar novas memórias após o evento." },
-        { q: "Qual estrutura foi removida em H.M.?", options: ["Amígdala", "Hipocampo bilateral", "Cerebelo", "Tálamo"], answer: 1, explain: "A lobectomia bilateral do hipocampo causou a amnésia de H.M." },
-        { q: "Neuropsicologia integra conhecimentos de:", options: ["Apenas filosofia", "Neurociência e psicologia", "Somente estatística", "Apenas pedagogia"], answer: 1, explain: "É a interface entre neurobiologia e processos psicológicos." },
-        { q: "A avaliação neuropsicológica utiliza:", options: ["Somente entrevista", "Testes padronizados e observação clínica", "Apenas neuroimagem", "Somente exames de sangue"], answer: 1, explain: "Combina instrumentos padronizados, entrevista e raciocínio clínico." },
-        { q: "H.M. preservou memória:", options: ["Episódica nova", "Procedimental / antiga", "Nenhuma", "Somente emocional nova"], answer: 1, explain: "H.M. mantinha memórias antigas e aprendia habilidades motoras (procedimental)." }
+        { q: "A amnésia anterógrada significa dificuldade em:", options: ["Lembrar eventos passados","Formar novas memórias","Produzir fala articulada","Processar estímulos visuais"], answer: 1, explain: "Anterógrada = incapacidade de consolidar novas memórias após o evento." },
+        { q: "Qual estrutura foi removida em H.M.?", options: ["Amígdala bilateral","Hipocampo bilateral","Cerebelo bilateral","Tálamo bilateral"], answer: 1, explain: "A lobectomia bilateral do hipocampo causou a amnésia de H.M." },
+        { q: "Neuropsicologia integra conhecimentos de:", options: ["Filosofia continental apenas","Neurociência e psicologia","Estatística matemática apenas","Pedagogia escolar apenas"], answer: 1, explain: "É a interface entre neurobiologia e processos psicológicos." },
+        { q: "A avaliação neuropsicológica utiliza:", options: ["Somente entrevista clínica","Testes padronizados e observação","Apenas exames de neuroimagem","Somente exames laboratoriais"], answer: 1, explain: "Combina instrumentos padronizados, entrevista e raciocínio clínico." },
+        { q: "H.M. preservou memória:", options: ["Episódica recente intacta","Procedimental e antiga","Nenhuma forma de memória","Somente emocional recente"], answer: 1, explain: "H.M. mantinha memórias antigas e aprendia habilidades motoras (procedimental)." }
       ]
     }
   },
@@ -197,11 +197,11 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "Afasia de Broca caracteriza-se por:", options: ["Fala fluente sem sentido", "Fala não fluente com compreensão relativamente preservada", "Surdez", "Cegueira"], answer: 1, explain: "Broca afeta produção; compreensão geralmente está melhor preservada." },
-      { q: "A área de Wernicke está envolvida em:", options: ["Produção motora", "Compreensão da linguagem", "Visão", "Equilíbrio"], answer: 1, explain: "Wernicke processa a compreensão da linguagem falada e escrita." },
-      { q: "Prosopagnosia é dificuldade em reconhecer:", options: ["Cores", "Rostos", "Sons", "Objetos pelo tato"], answer: 1, explain: "Prosopagnosia = agnosia visual para rostos." },
-      { q: "O SRAA (sistema reticular) está relacionado a:", options: ["Visão primária", "Vigília e atenção", "Audição", "Motricidade fina"], answer: 1, explain: "O SRAA regula estados de alerta e vigília." },
-      { q: "Afasia de Wernicke apresenta fala:", options: ["Não fluente e telegráfica", "Fluente mas sem sentido (parafasias)", "Mutismo total", "Normal"], answer: 1, explain: "Pacientes falam fluentemente, mas com parafasias e neologismos." }
+      { q: "Afasia de Broca caracteriza-se por:", options: ["Fala fluente, mas sem compreensão adequada", "Fala não fluente, compreensão preservada", "Perda total da audição bilateral profunda", "Perda total da visão binocular central"], answer: 1, explain: "Broca afeta produção; compreensão geralmente está melhor preservada." },
+      { q: "A área de Wernicke está envolvida em:", options: ["Produção motora da fala","Compreensão da linguagem","Processamento visual primário","Controle do equilíbrio"], answer: 1, explain: "Wernicke processa a compreensão da linguagem falada e escrita." },
+      { q: "Prosopagnosia é dificuldade em reconhecer:", options: ["Cores e tonalidades","Rostos de pessoas conhecidas","Sons ambientais complexos","Objetos pelo tato apenas"], answer: 1, explain: "Prosopagnosia = agnosia visual para rostos." },
+      { q: "O SRAA (sistema reticular) está relacionado a:", options: ["Processamento visual primário","Vigília e atenção global","Processamento auditivo primário","Motricidade fina dos dedos"], answer: 1, explain: "O SRAA regula estados de alerta e vigília." },
+      { q: "Afasia de Wernicke apresenta fala:", options: ["Não fluente e telegráfica","Fluente, porém sem sentido","Mutismo completo e duradouro","Normal e bem articulada"], answer: 1, explain: "Pacientes falam fluentemente, mas com parafasias e neologismos." }
     ],
     matching: [
       { term: "Broca", match: "Produção da fala" },
@@ -214,11 +214,11 @@ const UNITS = [
       name: "Oráculo da Linguagem",
       desc: "Prove seu domínio sobre linguagem, atenção e percepção!",
       questions: [
-        { q: "Agrafia está associada a dificuldade em:", options: ["Ler", "Escrever", "Ouvir", "Andar"], answer: 1, explain: "Agrafia = incapacidade de escrever, frequentemente com alexia." },
-        { q: "Atenção dividida envolve:", options: ["Focar em um estímulo", "Processar múltiplos estímulos simultaneamente", "Dormir", "Memorizar"], answer: 1, explain: "Atenção dividida = capacidade de monitorar e responder a múltiplas fontes." },
-        { q: "Lesão no fascículo arqueado causa:", options: ["Afasia de Broca", "Afasia de condução", "Surdez", "Cegueira cortical"], answer: 1, explain: "Desconecta Wernicke de Broca — compreende mas não repete bem." },
-        { q: "Astereognosia é agnosia:", options: ["Visual", "Auditiva", "Tátil", "Olfativa"], answer: 2, explain: "Incapacidade de reconhecer objetos pelo tato com sensibilidade preservada." },
-        { q: "O córtex parietal posterior participa de:", options: ["Audição primária", "Atenção espacial", "Produção de fala", "Visão de cores exclusivamente"], answer: 1, explain: "Parietal posterior integra informação espacial e atenção." }
+        { q: "Agrafia está associada a dificuldade em:", options: ["Ler textos escritos","Escrever palavras e frases","Ouvir sons ambientais","Executar movimentos de marcha"], answer: 1, explain: "Agrafia = incapacidade de escrever, frequentemente com alexia." },
+        { q: "Atenção dividida envolve:", options: ["Focar em um único estímulo relevante","Processar vários estímulos ao mesmo tempo","Reduzir o nível de vigília global","Armazenar memórias antigas episódicas"], answer: 1, explain: "Atenção dividida = capacidade de monitorar e responder a múltiplas fontes." },
+        { q: "Lesão no fascículo arqueado causa:", options: ["Afasia motora de Broca","Afasia de condução","Surdez neurossensorial","Cegueira cortical total"], answer: 1, explain: "Desconecta Wernicke de Broca — compreende mas não repete bem." },
+        { q: "Astereognosia é agnosia:", options: ["Do tipo visual","Do tipo auditiva","Do tipo tátil","Do tipo olfativa"], answer: 2, explain: "Incapacidade de reconhecer objetos pelo tato com sensibilidade preservada." },
+        { q: "O córtex parietal posterior participa de:", options: ["Audição primária localizada","Atenção espacial integrada","Produção motora da fala","Visão de cores isolada"], answer: 1, explain: "Parietal posterior integra informação espacial e atenção." }
       ]
     }
   },
@@ -276,11 +276,11 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "O hipocampo é essencial para:", options: ["Coordenação motora", "Consolidação de memórias declarativas", "Visão", "Produção de fala"], answer: 1, explain: "O hipocampo consolida novas memórias episódicas e semânticas." },
-      { q: "Amnésia retrógrada significa:", options: ["Não formar novas memórias", "Perder memórias anteriores ao evento", "Esquecer apenas rostos", "Perder habilidades motoras"], answer: 1, explain: "Retrógrada = perda de memórias formadas antes da lesão/dano." },
-      { q: "Funções executivas estão principalmente no:", options: ["Occipital", "Córtex pré-frontal", "Cerebelo", "Tronco encefálico"], answer: 1, explain: "O PFC é o centro das funções executivas." },
-      { q: "Memória procedimental é do tipo:", options: ["Declarativa explícita", "Implícita (habilidades)", "Sensorial", "Episódica autobiográfica"], answer: 1, explain: "Procedimental = habilidades como andar de bicicleta, implícita." },
-      { q: "Síndrome de Korsakoff está associada a:", options: ["Trauma craniano", "Deficiência de tiamina (álcool)", "Epilepsia", "Autismo"], answer: 1, explain: "Korsakoff resulta de deficiência de tiamina, comum em alcoolismo crônico." }
+      { q: "O hipocampo é essencial para:", options: ["Coordenação motora fina dos dedos","Consolidação da memória declarativa","Processamento visual primário occipital","Produção articulada da fala motora"], answer: 1, explain: "O hipocampo consolida novas memórias episódicas e semânticas." },
+      { q: "Amnésia retrógrada significa:", options: ["Não formar novas memórias","Perder memórias anteriores ao evento","Esquecer apenas nomes de rostos","Perder habilidades motoras aprendidas"], answer: 1, explain: "Retrógrada = perda de memórias formadas antes da lesão/dano." },
+      { q: "Funções executivas estão principalmente no:", options: ["Lobo occipital posterior","Córtex pré-frontal dorsal","Cerebelo hemisférico","Tronco encefálico medular"], answer: 1, explain: "O PFC é o centro das funções executivas." },
+      { q: "Memória procedimental é do tipo:", options: ["Declarativa e explícita","Implícita de habilidades","Sensorial de curto prazo","Episódica autobiográfica"], answer: 1, explain: "Procedimental = habilidades como andar de bicicleta, implícita." },
+      { q: "Síndrome de Korsakoff está associada a:", options: ["Trauma cranioencefálico grave","Deficiência de tiamina por álcool","Crises epilépticas recorrentes","Transtorno do espectro autista"], answer: 1, explain: "Korsakoff resulta de deficiência de tiamina, comum em alcoolismo crônico." }
     ],
     matching: [
       { term: "Hipocampo", match: "Consolidação de memória" },
@@ -293,11 +293,11 @@ const UNITS = [
       name: "Titã da Cognição",
       desc: "Enfrente o desafio final sobre memória e funções executivas!",
       questions: [
-        { q: "Perseveração em lesões frontais significa:", options: ["Esquecer tudo", "Repetir respostas inadequadamente", "Falar fluentemente", "Ver alucinações"], answer: 1, explain: "Perseveração = dificuldade em mudar de resposta/comportamento." },
-        { q: "Teste de Stroop avalia principalmente:", options: ["Memória visual", "Inibição / controle atencional", "Audição", "Motricidade grossa"], answer: 1, explain: "Stroop mede interferência e capacidade de inibir resposta automática." },
-        { q: "Reconsolidação ocorre quando:", options: ["Memória é formada pela 1ª vez", "Memória reativada pode ser modificada", "Hipocampo é removido", "Pessoa dorme"], answer: 1, explain: "Ao reativar uma memória, ela entra em estado labil antes de reconsolidar." },
-        { q: "Memória semântica armazena:", options: ["Eventos pessoais", "Conhecimentos gerais (fatos)", "Habilidades motoras", "Sensações momentâneas"], answer: 1, explain: "Semântica = conhecimento factual descontextualizado." },
-        { q: "Flexibilidade cognitiva é testada por:", options: ["Raven", "Wisconsin Card Sorting", "Audiometria", "Eletroencefalograma"], answer: 1, explain: "WCST avalia alternância entre categorias — flexibilidade cognitiva." }
+        { q: "Perseveração em lesões frontais significa:", options: ["Esquecer todos os eventos","Repetir respostas inadequadamente","Falar de forma excessivamente fluente","Ver imagens sem estímulo real"], answer: 1, explain: "Perseveração = dificuldade em mudar de resposta/comportamento." },
+        { q: "Teste de Stroop avalia principalmente:", options: ["Memória visual de curto prazo","Inibição e controle atencional","Processamento auditivo básico","Motricidade grossa e equilíbrio"], answer: 1, explain: "Stroop mede interferência e capacidade de inibir resposta automática." },
+        { q: "Reconsolidação ocorre quando:", options: ["A memória é formada pela 1ª vez","Memória reativada pode ser alterada","O hipocampo é removido cirurgicamente","A pessoa entra em sono profundo"], answer: 1, explain: "Ao reativar uma memória, ela entra em estado labil antes de reconsolidar." },
+        { q: "Memória semântica armazena:", options: ["Eventos autobiográficos pessoais","Conhecimentos gerais e fatos","Habilidades motoras automatizadas","Sensações momentâneas sensoriais"], answer: 1, explain: "Semântica = conhecimento factual descontextualizado." },
+        { q: "Flexibilidade cognitiva é testada por:", options: ["Teste de Raven progressivo","Wisconsin Card Sorting Test","Audiometria tonal liminar","Eletroencefalograma de repouso"], answer: 1, explain: "WCST avalia alternância entre categorias — flexibilidade cognitiva." }
       ]
     }
   },
@@ -352,11 +352,11 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "TDAH envolve disfunção principalmente em circuitos:", options: ["Occipitais", "Fronto-estriatais", "Auditivos", "Olfativos"], answer: 1, explain: "TDAH afeta circuitos fronto-estriatais e funções executivas." },
-      { q: "Dislexia está associada a dificuldade em:", options: ["Cálculo", "Decodificação/leitura", "Movimento", "Emoção"], answer: 1, explain: "Dislexia = transtorno específico de aprendizagem da leitura." },
-      { q: "Teoria da mente está comprometida em:", options: ["TDAH apenas", "TEA", "Dislexia", "Discalculia apenas"], answer: 1, explain: "TEA envolve dificuldade em compreender estados mentais alheios." },
-      { q: "Discalculia envolve dificuldade com:", options: ["Leitura", "Conceitos numéricos e cálculo", "Fala", "Coordenação motora grossa"], answer: 1, explain: "Discalculia = TEA específico de matemática." },
-      { q: "Perfil neuropsicológico do TDAH inclui déficit de:", options: ["Visão periférica", "Atenção sustentada e inibição", "Audição", "Tato"], answer: 1, explain: "Desatenção, impulsividade e déficits executivos caracterizam o TDAH." }
+      { q: "TDAH envolve disfunção principalmente em circuitos:", options: ["Occipitais de processamento visual","Fronto-estriatais de atenção","Auditivos do tronco encefálico","Olfativos do bulbo olfatório"], answer: 1, explain: "TDAH afeta circuitos fronto-estriatais e funções executivas." },
+      { q: "Dislexia está associada a dificuldade em:", options: ["Cálculo e raciocínio numérico escolar","Decodificação e leitura de palavras","Coordenação motora global e postura","Regulação emocional básica social"], answer: 1, explain: "Dislexia = transtorno específico de aprendizagem da leitura." },
+      { q: "Teoria da mente está comprometida em:", options: ["Transtorno de déficit de atenção","Transtorno do espectro autista","Dislexia do desenvolvimento","Discalculia isolada"], answer: 1, explain: "TEA envolve dificuldade em compreender estados mentais alheios." },
+      { q: "Discalculia envolve dificuldade com:", options: ["Leitura e compreensão textual","Conceitos numéricos e cálculo","Produção articulada da fala","Coordenação motora grossa"], answer: 1, explain: "Discalculia = TEA específico de matemática." },
+      { q: "Perfil neuropsicológico do TDAH inclui déficit de:", options: ["Visão periférica e contraste","Atenção sustentada e inibição","Audição tonal e localização","Percepção tátil discriminativa"], answer: 1, explain: "Desatenção, impulsividade e déficits executivos caracterizam o TDAH." }
     ],
     matching: [
       { term: "TDAH", match: "Desatenção e impulsividade" },
@@ -369,11 +369,11 @@ const UNITS = [
       name: "Guardião do Desenvolvimento",
       desc: "Prove que entende os transtornos do neurodesenvolvimento!",
       questions: [
-        { q: "Comorbidade comum entre TDAH e:", options: ["TEA e dislexia", "Cegueira", "Surdez congênita", "Paralisia"], answer: 0, explain: "TDAH frequentemente coocorre com TEA, dislexia e discalculia." },
-        { q: "Dislexia envolve alterações em áreas:", options: ["Occipitais direitas", "Temporo-parietais esquerdas", "Cerebelares", "Motora primária"], answer: 1, explain: "Processamento fonológico depende de regiões temporo-parietais esquerdas." },
-        { q: "Flexibilidade cognitiva reduzida é comum em:", options: ["Apenas demência", "TEA", "Apenas alexia", "Surdez"], answer: 1, explain: "TEA envolve rigidez cognitiva e dificuldade de alternância." },
-        { q: "Intervenção precoce se baseia em:", options: ["Neuroplasticidade", "Imobilização", "Isolamento social", "Restrição alimentar"], answer: 0, explain: "Neuroplasticidade permite reorganização e ganhos com estimulação." },
-        { q: "TEA caracteriza-se por déficits em:", options: ["Motricidade grossa exclusivamente", "Comunicação social e interação", "Audição primária", "Visão periférica"], answer: 1, explain: "Déficits sociais e padrões repetitivos são critérios centrais do TEA." }
+        { q: "Comorbidade comum entre TDAH e:", options: ["TEA e dislexia associados","Cegueira congênita total","Surdez congênita profunda","Paralisia cerebral grave"], answer: 0, explain: "TDAH frequentemente coocorre com TEA, dislexia e discalculia." },
+        { q: "Dislexia envolve alterações em áreas:", options: ["Occipitais do hemisfério direito visual","Temporo-parietais do hemisfério esquerdo","Cerebelares de coordenação motora fina","Motoras primárias do membro superior"], answer: 1, explain: "Processamento fonológico depende de regiões temporo-parietais esquerdas." },
+        { q: "Flexibilidade cognitiva reduzida é comum em:", options: ["Demência avançada de início tardio","Transtorno do espectro autista","Alexia pura sem agrafia associada","Surdez neurossensorial congênita"], answer: 1, explain: "TEA envolve rigidez cognitiva e dificuldade de alternância." },
+        { q: "Intervenção precoce se baseia em:", options: ["Neuroplasticidade cerebral","Imobilização motora prolongada","Isolamento social total","Restrição alimentar severa"], answer: 0, explain: "Neuroplasticidade permite reorganização e ganhos com estimulação." },
+        { q: "TEA caracteriza-se por déficits em:", options: ["Motricidade grossa exclusiva","Comunicação social e interação","Audição primária localizada","Visão periférica e contraste"], answer: 1, explain: "Déficits sociais e padrões repetitivos são critérios centrais do TEA." }
       ]
     }
   },
@@ -434,11 +434,11 @@ const UNITS = [
       }
     ],
     quiz: [
-      { q: "A Doença de Alzheimer inicia tipicamente com:", options: ["Alteração de personalidade", "Comprometimento de memória episódica", "Crises convulsivas", "Paralisia"], answer: 1, explain: "DA classicamente começa com memória episódica e aprendizado de novas informações." },
-      { q: "Demência frontotemporal afeta precocemente:", options: ["Visão", "Personalidade e funções executivas", "Audição", "Motricidade fina exclusivamente"], answer: 1, explain: "DFT compromete comportamento, personalidade e/ou linguagem precocemente." },
-      { q: "AVE isquêmico resulta de:", options: ["Sangramento", "Obstrução vascular", "Trauma", "Infecção"], answer: 1, explain: "Isquemia = falta de fluxo sanguíneo por obstrução." },
-      { q: "Neuroplasticidade permite:", options: ["Apenas deterioração", "Reorganização cerebral após lesão", "Imobilidade neural", "Perda total de função"], answer: 1, explain: "Plasticidade = capacidade de adaptação e reorganização neural." },
-      { q: "Placas de beta-amiloide são marcadores de:", options: ["TDAH", "Doença de Alzheimer", "TEA", "Dislexia"], answer: 1, explain: "Placas amiloides e emaranhados de tau são hallmarks da DA." }
+      { q: "A Doença de Alzheimer inicia tipicamente com:", options: ["Mudança abrupta de personalidade","Comprometimento da memória episódica","Crises convulsivas generalizadas","Paralisia unilateral do corpo"], answer: 1, explain: "DA classicamente começa com memória episódica e aprendizado de novas informações." },
+      { q: "Demência frontotemporal afeta precocemente:", options: ["Processamento visual complexo","Personalidade e funções executivas","Processamento auditivo primário","Motricidade fina dos dedos"], answer: 1, explain: "DFT compromete comportamento, personalidade e/ou linguagem precocemente." },
+      { q: "AVE isquêmico resulta de:", options: ["Ruptura e sangramento vascular","Obstrução do fluxo sanguíneo","Trauma contuso craniano","Infecção do tecido nervoso"], answer: 1, explain: "Isquemia = falta de fluxo sanguíneo por obstrução." },
+      { q: "Neuroplasticidade permite:", options: ["Apenas deterioração progressiva","Reorganização cerebral após lesão","Imobilidade permanente das sinapses","Perda total irreversível de função"], answer: 1, explain: "Plasticidade = capacidade de adaptação e reorganização neural." },
+      { q: "Placas de beta-amiloide são marcadores de:", options: ["Transtorno de déficit de atenção","Doença de Alzheimer","Transtorno do espectro autista","Dislexia do desenvolvimento"], answer: 1, explain: "Placas amiloides e emaranhados de tau são hallmarks da DA." }
     ],
     matching: [
       { term: "Alzheimer", match: "Memória episódica inicial" },
@@ -451,11 +451,11 @@ const UNITS = [
       name: "Lorde Neurológico",
       desc: "O chefe final! Prove que domina todo o semestre!",
       questions: [
-        { q: "Demência vascular caracteriza-se por:", options: ["Início insidioso lento", "Padrão escalonado com eventos vasculares", "Somente em jovens", "Ausência de comprometimento cognitivo"], answer: 1, explain: "Demência vascular tem relação com AVCs múltiplos — declínio em degraus." },
-        { q: "Reabilitação neuropsicológica se baseia em:", options: ["Repouso absoluto", "Neuroplasticidade e estimulação cognitiva", "Isolamento", "Restrição de estímulos"], answer: 1, explain: "Estimular circuitos e estratégias compensatórias aproveita plasticidade." },
-        { q: "Em Parkinson, a demência é frequentemente do tipo:", options: ["Cortical pura", "Subcortical (lentificação, rigidez)", "Somente visual", "Somente auditiva"], answer: 1, explain: "Demência parkinsoniana tem perfil subcortical: lentificação, rigidez cognitiva." },
-        { q: "Reserva cognitiva refere-se a:", options: ["Capacidade de compensar lesões", "Impossibilidade de aprender", "Ausência de neurônios", "Somente genética"], answer: 0, explain: "Maior reserva = mais capacidade de compensar dano cerebral." },
-        { q: "A avaliação neuropsicológica em demência busca:", options: ["Apenas QI", "Perfil cognitivo, diagnóstico diferencial e baseline", "Somente humor", "Exclusivamente visão"], answer: 1, explain: "Mapeia déficits, diferencia tipos de demência e estabelece linha de base." }
+        { q: "Demência vascular caracteriza-se por:", options: ["Início lento e progressivo contínuo","Declínio em degraus com AVCs","Ocorrência exclusiva em jovens","Ausência de prejuízo cognitivo"], answer: 1, explain: "Demência vascular tem relação com AVCs múltiplos — declínio em degraus." },
+        { q: "Reabilitação neuropsicológica se baseia em:", options: ["Repouso absoluto e isolamento","Neuroplasticidade e estimulação","Restrição total de estímulos","Imobilização prolongada do paciente"], answer: 1, explain: "Estimular circuitos e estratégias compensatórias aproveita plasticidade." },
+        { q: "Em Parkinson, a demência é frequentemente do tipo:", options: ["Cortical com afasia precoce","Subcortical com lentificação","Puramente visual e espacial","Puramente auditiva e verbal"], answer: 1, explain: "Demência parkinsoniana tem perfil subcortical: lentificação, rigidez cognitiva." },
+        { q: "Reserva cognitiva refere-se a:", options: ["Capacidade de compensar lesões","Impossibilidade de aprender novas tarefas","Ausência completa de neurônios","Determinação exclusivamente genética"], answer: 0, explain: "Maior reserva = mais capacidade de compensar dano cerebral." },
+        { q: "A avaliação neuropsicológica em demência busca:", options: ["Medir apenas o quociente de inteligência","Mapear perfil cognitivo e diagnóstico","Avaliar somente o humor e afeto","Investigar exclusivamente a visão"], answer: 1, explain: "Mapeia déficits, diferencia tipos de demência e estabelece linha de base." }
       ]
     }
   }
