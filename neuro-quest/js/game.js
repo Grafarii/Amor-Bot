@@ -231,6 +231,7 @@ function renderQuizQuestion() {
   document.getElementById('quizQuestion').textContent = q.q;
   document.getElementById('quizFeedback').className = 'quiz-feedback';
   document.getElementById('quizFeedback').innerHTML = '';
+  document.getElementById('btnNextQuestion').style.display = 'none';
 
   const opts = document.getElementById('quizOptions');
   opts.classList.remove('is-answered');
@@ -245,10 +246,40 @@ function renderQuizQuestion() {
   });
 }
 
+function showAnswerFeedback({ fb, correct, question, selected, resultTitle, xpLine }) {
+  fb.className = `quiz-feedback show ${correct ? 'correct-fb' : 'wrong-fb'}`;
+
+  if (correct) {
+    fb.innerHTML = `
+      <div class="feedback-title">${resultTitle}</div>
+      ${xpLine ? `<p class="feedback-answer">${xpLine}</p>` : ''}
+      <p class="feedback-explain"><strong>Por que você acertou:</strong> ${question.explain}</p>
+    `;
+  } else {
+    fb.innerHTML = `
+      <div class="feedback-title">${resultTitle}</div>
+      <p class="feedback-answer"><strong>Resposta correta:</strong> ${question.options[question.answer]}</p>
+      <p class="feedback-explain"><strong>Por que você errou:</strong> ${question.explain}</p>
+    `;
+  }
+}
+
+function goToNextQuizQuestion() {
+  document.getElementById('btnNextQuestion').style.display = 'none';
+  quizIndex++;
+  if (quizIndex >= quizQuestions.length) {
+    finishQuiz();
+  } else {
+    renderQuizQuestion();
+  }
+}
+
 function answerQuiz(selected) {
   const q = quizQuestions[quizIndex];
   const optsContainer = document.getElementById('quizOptions');
   const opts = optsContainer.querySelectorAll('.quiz-option');
+  if (optsContainer.classList.contains('is-answered')) return;
+
   optsContainer.classList.add('is-answered');
   opts.forEach((btn, i) => {
     btn.classList.add('disabled');
@@ -265,26 +296,33 @@ function answerQuiz(selected) {
     quizCorrectInRow++;
     if (state.streak > state.bestStreak) state.bestStreak = state.streak;
     addXp(15);
-    fb.className = 'quiz-feedback show correct-fb';
-    fb.innerHTML = `✅ Correto! +15 XP<br><small>${q.explain}</small>`;
+    showAnswerFeedback({
+      fb,
+      correct: true,
+      question: q,
+      selected,
+      resultTitle: '✅ Resposta correta!',
+      xpLine: '+15 XP'
+    });
     checkAchievement('streak5', state.streak >= 5);
     checkAchievement('streak10', state.streak >= 10);
   } else {
     state.streak = 0;
     loseHeart();
-    fb.className = 'quiz-feedback show wrong-fb';
-    fb.innerHTML = `❌ Errado. Resposta: <strong>${q.options[q.answer]}</strong><br><small>${q.explain}</small>`;
+    showAnswerFeedback({
+      fb,
+      correct: false,
+      question: q,
+      selected,
+      resultTitle: '❌ Resposta incorreta'
+    });
   }
 
   saveState();
-  setTimeout(() => {
-    quizIndex++;
-    if (quizIndex >= quizQuestions.length) {
-      finishQuiz();
-    } else {
-      renderQuizQuestion();
-    }
-  }, 2200);
+
+  const nextBtn = document.getElementById('btnNextQuestion');
+  nextBtn.textContent = quizIndex >= quizQuestions.length - 1 ? 'Concluir quiz' : 'Próxima pergunta';
+  nextBtn.style.display = 'block';
 }
 
 function finishQuiz() {
@@ -414,6 +452,7 @@ function renderBossQuestion() {
   document.getElementById('bossQuestion').textContent = q.q;
   document.getElementById('bossFeedback').className = 'quiz-feedback';
   document.getElementById('bossFeedback').innerHTML = '';
+  document.getElementById('btnNextBossQuestion').style.display = 'none';
 
   const opts = document.getElementById('bossOptions');
   opts.classList.remove('is-answered');
@@ -428,10 +467,22 @@ function renderBossQuestion() {
   });
 }
 
+function goToNextBossQuestion() {
+  document.getElementById('btnNextBossQuestion').style.display = 'none';
+  bossIndex++;
+  if (bossIndex >= bossQuestions.length || bossHp <= 0) {
+    victoryBoss();
+  } else {
+    renderBossQuestion();
+  }
+}
+
 function answerBoss(selected) {
   const q = bossQuestions[bossIndex];
   const optsContainer = document.getElementById('bossOptions');
   const opts = optsContainer.querySelectorAll('.quiz-option');
+  if (optsContainer.classList.contains('is-answered')) return;
+
   optsContainer.classList.add('is-answered');
   opts.forEach((btn, i) => {
     btn.classList.add('disabled');
@@ -445,28 +496,32 @@ function answerBoss(selected) {
     bossHp -= 100 / bossQuestions.length;
     state.streak++;
     addXp(20);
-    fb.className = 'quiz-feedback show correct-fb';
-    fb.innerHTML = `✅ Dano causado! +20 XP<br><small>${q.explain}</small>`;
+    showAnswerFeedback({
+      fb,
+      correct: true,
+      question: q,
+      selected,
+      resultTitle: '✅ Dano causado no chefe!',
+      xpLine: '+20 XP'
+    });
   } else {
     loseHeart();
     state.streak = 0;
-    fb.className = 'quiz-feedback show wrong-fb';
-    fb.innerHTML = `❌ O chefe contra-ataca! Resposta: <strong>${q.options[q.answer]}</strong><br><small>${q.explain}</small>`;
+    showAnswerFeedback({
+      fb,
+      correct: false,
+      question: q,
+      selected,
+      resultTitle: '❌ O chefe contra-ataca!'
+    });
   }
 
   saveState();
-  setTimeout(() => {
-    bossIndex++;
-    if (bossIndex >= bossQuestions.length || bossHp <= 0) {
-      if (bossHp <= 0 || bossIndex >= bossQuestions.length) {
-        victoryBoss();
-      } else {
-        renderBossQuestion();
-      }
-    } else {
-      renderBossQuestion();
-    }
-  }, 2200);
+
+  const nextBtn = document.getElementById('btnNextBossQuestion');
+  const isLast = bossIndex >= bossQuestions.length - 1 || bossHp <= 0;
+  nextBtn.textContent = isLast ? 'Ver resultado' : 'Próxima pergunta';
+  nextBtn.style.display = 'block';
 }
 
 function victoryBoss() {
