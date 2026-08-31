@@ -419,26 +419,38 @@ h2 {
   text-align: left;
   color: var(--text);
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.quiz-option:hover:not(.disabled) {
-  border-color: var(--accent);
-  background: var(--bg-card-hover);
+@media (hover: hover) and (pointer: fine) {
+  .quiz-option:hover:not(.disabled):not(.correct):not(.wrong) {
+    border-color: var(--accent);
+    background: var(--bg-card-hover);
+  }
 }
 
-.quiz-option.correct {
-  border-color: var(--success);
-  background: rgba(16, 185, 129, 0.15);
+.quiz-option.correct,
+.quiz-option.correct:hover,
+.quiz-option.correct:focus {
+  border-color: var(--success) !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7;
 }
 
-.quiz-option.wrong {
-  border-color: var(--error);
-  background: rgba(239, 68, 68, 0.15);
+.quiz-option.wrong,
+.quiz-option.wrong:hover,
+.quiz-option.wrong:focus {
+  border-color: var(--error) !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5;
 }
 
 .quiz-option.disabled {
   cursor: default;
-  opacity: 0.7;
+}
+
+.quiz-option.disabled:not(.correct):not(.wrong) {
+  opacity: 0.55;
 }
 
 .quiz-feedback {
@@ -490,8 +502,10 @@ h2 {
   font-size: 0.95rem;
 }
 
-.match-item:hover:not(.matched) {
-  border-color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .match-item:hover:not(.matched):not(.selected) {
+    border-color: var(--accent);
+  }
 }
 
 .match-item.selected {
