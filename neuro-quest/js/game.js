@@ -214,7 +214,7 @@ function nextLessonCard() {
 
 function startQuiz(unitId) {
   currentUnit = UNITS.find(u => u.id === unitId);
-  quizQuestions = [...currentUnit.quiz].sort(() => Math.random() - 0.5);
+  quizQuestions = prepareQuestions(currentUnit.quiz).sort(() => Math.random() - 0.5);
   quizIndex = 0;
   quizMode = 'quiz';
   quizCorrectInRow = 0;
@@ -386,7 +386,7 @@ function finishMatch() {
 
 function startBoss(unitId) {
   currentUnit = UNITS.find(u => u.id === unitId);
-  bossQuestions = [...currentUnit.boss.questions];
+  bossQuestions = prepareQuestions(currentUnit.boss.questions);
   bossIndex = 0;
   bossHp = 100;
   showScreen('screen-boss');
