@@ -2,8 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#7c3aed">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NeuroQuest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Jogo educativo de Neurociências e Neuropsicologia — 2º semestre de Psicologia">
   <title>NeuroQuest — Neurociências & Neuropsicologia</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -85,7 +93,7 @@
         <h3 id="matchTitle">Associe as Estruturas</h3>
         <span id="matchScore">0/0</span>
       </div>
-      <p class="match-instruction">Clique em um termo e depois no correspondente</p>
+      <p class="match-instruction">Toque em um termo e depois no correspondente</p>
       <div class="match-grid">
         <div class="match-column" id="matchLeft"></div>
         <div class="match-column" id="matchRight"></div>
@@ -147,5 +155,10 @@
 
   <script src="js/content.js"></script>
   <script src="js/game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

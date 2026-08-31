@@ -692,10 +692,197 @@ h2 {
   transform: translateX(-50%) translateY(0);
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+  min-height: 100dvh;
+  overscroll-behavior: none;
+}
+
+.top-bar {
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+}
+
+.logo-text {
+  font-size: 1.1rem;
+}
+
+.player-stats {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.btn,
+.quiz-option,
+.match-item,
+.world-node,
+.btn-back {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn {
+  min-height: 48px;
+  padding: 14px 24px;
+}
+
+.quiz-option {
+  min-height: 52px;
+  padding: 16px 18px;
+}
+
+.match-item {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+main {
+  padding: 16px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.toast {
+  bottom: max(24px, env(safe-area-inset-bottom));
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+.lesson-nav,
+.flashcard-actions,
+.map-actions {
+  gap: 10px;
+}
+
+.lesson-nav .btn,
+.flashcard-actions .btn,
+.map-actions .btn {
+  flex: 1;
+}
+
+.map-actions {
+  flex-direction: column;
+}
+
+.world-node {
+  padding: 16px;
+  gap: 12px;
+}
+
+.world-icon {
+  font-size: 2rem;
+  min-width: 48px;
+}
+
+.world-info h3 {
+  font-size: 1rem;
+}
+
+.world-info p {
+  font-size: 0.8rem;
+}
+
+.progress-ring {
+  width: 42px;
+  height: 42px;
+  font-size: 0.7rem;
+}
+
+.quiz-question {
+  padding: 20px;
+  font-size: 1.05rem;
+}
+
+.match-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.match-header {
+  flex-wrap: wrap;
+}
+
+.match-header h3 {
+  font-size: 1rem;
+  width: 100%;
+  order: 2;
+}
+
+.hero {
+  padding: 24px 12px;
+}
+
+.hero h1 {
+  font-size: 1.75rem;
+}
+
+.hero-brain {
+  font-size: 4rem;
+}
+
+.hero-desc {
+  font-size: 0.95rem;
+}
+
+.hero .btn-lg {
+  width: 100%;
+  max-width: 320px;
+}
+
+.hero .btn-secondary {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 10px;
+}
+
+.achievements-preview {
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.ach-badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+}
+
+.flashcard {
+  height: 240px;
+  margin: 20px auto;
+}
+
+.flashcard-front,
+.flashcard-back {
+  padding: 20px;
+  font-size: 1rem;
+}
+
+.achievements-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.boss-sprite {
+  font-size: 4rem;
+}
+
+@media (max-width: 380px) {
+  .logo-text { display: none; }
+  .stat { padding: 4px 8px; font-size: 0.75rem; }
+  .hearts .stat-icon { display: none; }
+  .match-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.5rem; }
+}
+
 @media (max-width: 600px) {
   .hero h1 { font-size: 1.8rem; }
   .player-stats { gap: 8px; }
   .stat { padding: 4px 10px; font-size: 0.8rem; }
-  .match-grid { grid-template-columns: 1fr; }
   .lesson-card { padding: 20px; }
 }

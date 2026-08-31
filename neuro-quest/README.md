@@ -2,6 +2,16 @@
 
 Jogo educativo para aprender **Neurociências e Neuropsicologia** (2º semestre — Psicologia).
 
+## Jogar no celular
+
+Acesse direto no navegador do celular:
+
+**https://grafarii.github.io/Amor-Bot/**
+
+Para instalar como app na tela inicial:
+- **iPhone:** Safari → Compartilhar → "Adicionar à Tela de Início"
+- **Android:** Chrome → menu (⋮) → "Instalar app" ou "Adicionar à tela inicial"
+
 ## Como jogar
 
 1. Abra `index.html` no navegador (duplo clique ou servidor local)
