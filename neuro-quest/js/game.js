@@ -233,9 +233,12 @@ function renderQuizQuestion() {
   document.getElementById('quizFeedback').innerHTML = '';
 
   const opts = document.getElementById('quizOptions');
+  opts.classList.remove('is-answered');
   opts.innerHTML = q.options.map((opt, i) =>
-    `<button class="quiz-option" data-idx="${i}">${opt}</button>`
+    `<div class="quiz-option" role="button" tabindex="-1" data-idx="${i}">${opt}</div>`
   ).join('');
+
+  if (document.activeElement) document.activeElement.blur();
 
   opts.querySelectorAll('.quiz-option').forEach(btn => {
     btn.addEventListener('click', () => answerQuiz(parseInt(btn.dataset.idx)));
@@ -244,7 +247,9 @@ function renderQuizQuestion() {
 
 function answerQuiz(selected) {
   const q = quizQuestions[quizIndex];
-  const opts = document.querySelectorAll('#quizOptions .quiz-option');
+  const optsContainer = document.getElementById('quizOptions');
+  const opts = optsContainer.querySelectorAll('.quiz-option');
+  optsContainer.classList.add('is-answered');
   opts.forEach((btn, i) => {
     btn.classList.add('disabled');
     if (i === q.answer) btn.classList.add('correct');
@@ -411,9 +416,12 @@ function renderBossQuestion() {
   document.getElementById('bossFeedback').innerHTML = '';
 
   const opts = document.getElementById('bossOptions');
+  opts.classList.remove('is-answered');
   opts.innerHTML = q.options.map((opt, i) =>
-    `<button class="quiz-option" data-idx="${i}">${opt}</button>`
+    `<div class="quiz-option" role="button" tabindex="-1" data-idx="${i}">${opt}</div>`
   ).join('');
+
+  if (document.activeElement) document.activeElement.blur();
 
   opts.querySelectorAll('.quiz-option').forEach(btn => {
     btn.addEventListener('click', () => answerBoss(parseInt(btn.dataset.idx)));
@@ -422,7 +430,9 @@ function renderBossQuestion() {
 
 function answerBoss(selected) {
   const q = bossQuestions[bossIndex];
-  const opts = document.querySelectorAll('#bossOptions .quiz-option');
+  const optsContainer = document.getElementById('bossOptions');
+  const opts = optsContainer.querySelectorAll('.quiz-option');
+  optsContainer.classList.add('is-answered');
   opts.forEach((btn, i) => {
     btn.classList.add('disabled');
     if (i === q.answer) btn.classList.add('correct');

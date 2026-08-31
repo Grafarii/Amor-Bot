@@ -423,26 +423,39 @@ h2 {
   -webkit-tap-highlight-color: transparent;
   word-break: break-word;
   width: 100%;
+  outline: none;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Antes de responder: todas as opções idênticas, sem hover/focus */
+.quiz-options:not(.is-answered) .quiz-option,
+.quiz-options:not(.is-answered) .quiz-option:hover,
+.quiz-options:not(.is-answered) .quiz-option:focus,
+.quiz-options:not(.is-answered) .quiz-option:focus-visible,
+.quiz-options:not(.is-answered) .quiz-option:active {
+  border-color: var(--border) !important;
+  background: var(--bg-card) !important;
+  color: var(--text) !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .quiz-option:hover:not(.disabled):not(.correct):not(.wrong) {
-    border-color: var(--accent);
-    background: var(--bg-card-hover);
+  .quiz-options:not(.is-answered) .quiz-option:hover {
+    border-color: var(--border) !important;
+    background: var(--bg-card-hover) !important;
   }
 }
 
-.quiz-option.correct,
-.quiz-option.correct:hover,
-.quiz-option.correct:focus {
+.quiz-options.is-answered .quiz-option.correct {
   border-color: var(--success) !important;
   background: rgba(16, 185, 129, 0.2) !important;
   color: #6ee7b7;
 }
 
-.quiz-option.wrong,
-.quiz-option.wrong:hover,
-.quiz-option.wrong:focus {
+.quiz-options.is-answered .quiz-option.wrong {
   border-color: var(--error) !important;
   background: rgba(239, 68, 68, 0.2) !important;
   color: #fca5a5;
@@ -452,7 +465,7 @@ h2 {
   cursor: default;
 }
 
-.quiz-option.disabled:not(.correct):not(.wrong) {
+.quiz-options.is-answered .quiz-option.disabled:not(.correct):not(.wrong) {
   opacity: 0.55;
 }
 
