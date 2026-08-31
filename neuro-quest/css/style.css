@@ -658,9 +658,11 @@ h2 {
 
 .flashcard {
   perspective: 1000px;
-  margin: 32px auto;
-  max-width: 500px;
-  height: 280px;
+  margin: 20px auto;
+  max-width: 520px;
+  width: 100%;
+  height: min(68vh, 480px);
+  min-height: 280px;
   cursor: pointer;
 }
 
@@ -680,21 +682,34 @@ h2 {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
+  display: block;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px;
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius);
-  text-align: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.flashcard-front {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  white-space: normal;
 }
 
 .flashcard-back {
   transform: rotateY(180deg);
-  color: var(--accent-light);
+  color: var(--text);
+  text-align: left;
 }
 
 .flashcard-actions {
@@ -881,17 +896,6 @@ main {
 .ach-badge {
   font-size: 0.75rem;
   padding: 6px 10px;
-}
-
-.flashcard {
-  height: 240px;
-  margin: 20px auto;
-}
-
-.flashcard-front,
-.flashcard-back {
-  padding: 20px;
-  font-size: 1rem;
 }
 
 .achievements-grid {

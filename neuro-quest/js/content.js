@@ -476,6 +476,22 @@ const ACHIEVEMENTS = [
   { id: "match_master", icon: "🔗", title: "Conector", desc: "Complete um desafio de associação", xp: 0 }
 ];
 
+function stripLessonContent(html) {
+  return html
+    .replace(/<\/li>/gi, '. ')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n /g, '\n')
+    .trim();
+}
+
 const FLASHCARDS = UNITS.flatMap(u =>
-  u.lessons.map(l => ({ front: l.title, back: l.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200) + '...', unit: u.title }))
+  u.lessons.map(l => ({
+    front: l.title,
+    back: stripLessonContent(l.content),
+    unit: u.title
+  }))
 );
