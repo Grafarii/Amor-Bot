@@ -55,6 +55,7 @@
       <div class="map-actions">
         <button class="btn btn-secondary" id="btnReview">Modo Revisão</button>
         <button class="btn btn-secondary" id="btnAchievements">Conquistas</button>
+        <button class="btn btn-secondary btn-reset-progress" id="btnResetProgress">Resetar progresso</button>
       </div>
     </section>
 
@@ -131,7 +132,6 @@
       <button class="btn-back" id="btnBackAchievements">← Voltar</button>
       <h2>Conquistas</h2>
       <div class="achievements-grid" id="achievementsGrid"></div>
-      <button class="btn btn-secondary btn-reset-progress" id="btnResetProgress">Resetar progresso</button>
     </section>
 
     <!-- Revisão -->
@@ -154,15 +154,15 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="js/content.js?v=7"></script>
-  <script src="js/quiz-utils.js?v=7"></script>
-  <script src="js/game.js?v=7"></script>
+  <script src="js/content.js?v=9"></script>
+  <script src="js/quiz-utils.js?v=9"></script>
+  <script src="js/game.js?v=9"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(reg => reg.unregister());
       }).finally(() => {
-        navigator.serviceWorker.register('./sw.js?v=7').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=9').catch(() => {});
       });
     }
   </script>

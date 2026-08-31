@@ -1,4 +1,4 @@
-const CACHE = 'neuroquest-v8';
+const CACHE = 'neuroquest-v9';
 const ASSETS = [
   './',
   './index.html',
