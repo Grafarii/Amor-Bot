@@ -16,10 +16,10 @@ Universidade Paulista (UNIP), São Paulo, SP, Brasil
 ---
 
 ## Título (português)
-Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas imersivas ao registro autobiográfico
+Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas originadas na realidade virtual ao registro autobiográfico
 
 ## Title (English)
-Virtual Confabulation: A Construct Proposal on the Integration of Immersive Episodic Memories into the Autobiographical Record
+Virtual Confabulation: A Construct Proposal on the Integration of Episodic Memories Originated in Virtual Reality into the Autobiographical Record
 
 ## Resumo (português)
 Ver PDF ou arquivo `ARTICLE-Confabulacao-Virtual-Cicivizzo-PT.md`
