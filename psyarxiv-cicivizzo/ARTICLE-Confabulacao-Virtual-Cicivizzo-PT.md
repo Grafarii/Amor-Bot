@@ -1,4 +1,4 @@
-# Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas imersivas ao registro autobiográfico
+# Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas originadas na realidade virtual ao registro autobiográfico
 
 **André Cicivizzo**  
 Graduando em Psicologia  
@@ -9,23 +9,19 @@ ORCID: https://orcid.org/0009-0008-8414-8403
 
 ---
 
-**Nota sobre a versão em inglês.** Esta é a versão em português do preprint *Virtual Confabulation: A Construct Proposal on the Integration of Immersive Episodic Memories into the Autobiographical Record* (Cicivizzo, 2026), depositado no PsyArXiv. URL: https://osf.io/preprints/psyarxiv/hrnxe_v1. As duas versões descrevem o mesmo constructo teórico; eventuais divergências futuras serão registradas por versionamento.
-
----
-
 ## Resumo
 
-A popularização de dispositivos de realidade virtual (RV) imersiva levanta uma questão ainda insuficientemente teorizada na psicologia cognitiva: o destino mnemônico de experiências simuladas codificadas com características fenomenológicas semelhantes às de eventos físicos. Este artigo propõe o constructo de *confabulação virtual* (também denominada *confabulação autobiográfica imersiva*) para designar o processo normativo e não patológico pelo qual *memórias virtuais imersivas*, isto é, registros episódicos formados por experiência incorporada em ambientes simulados, são recuperados e integrados ao registro autobiográfico do mundo físico, com distorções involuntárias de fonte, conteúdo ou contexto temporal. Ancorada no modelo reconstrutivo da memória episódica, no framework de monitoramento de fonte e em estudos empíricos sobre confusão entre memórias de RV e do mundo real, a proposta distingue confabulação virtual de confabulação clínica, falsa memória genérica e confusão de fonte isolada. Argumenta-se que a imersão tecnológica reduz a eficácia dos mecanismos que discriminam experiência simulada de experiência real, favorecendo a incorporação de memórias virtuais imersivas à auto-narrativa. Implicações para psicologia clínica, educação, contextos forenses e ética tecnológica são discutidas, com diretrizes metodológicas para operacionalização empírica do constructo.
+A popularização de dispositivos de realidade virtual (RV) imersiva levantou uma questão ainda insuficientemente teorizada na psicologia cognitiva: o destino mnemônico de experiências simuladas codificadas com características fenomenológicas semelhantes às de eventos físicos. Este artigo propõe o constructo de confabulação virtual para designar o processo pelo qual memórias virtuais, isto é, registros episódicos formados em ambientes simulados, são recuperados e integrados ao registro autobiográfico do mundo físico, com distorções involuntárias de fonte, conteúdo ou contexto temporal. Ancorada no modelo reconstrutivo da memória episódica, no framework de monitoramento de fonte e em estudos empíricos sobre confusão entre memórias de RV e do mundo real, a proposta distingue confabulação virtual de confabulação clínica, falsa memória genérica e confusão de fonte isolada. Argumenta-se que a imersão tecnológica reduz a eficácia dos mecanismos que discriminam experiência simulada de experiência real, favorecendo a incorporação de memórias virtuais à auto-narrativa. Implicações para psicologia clínica, educação, contextos forenses e ética tecnológica são discutidas, com diretrizes metodológicas para operacionalização empírica do constructo.
 
-**Palavras-chave:** confabulação virtual; memória virtual imersiva; realidade virtual; memória episódica; monitoramento de fonte; falsas memórias; memória autobiográfica
+**Palavras-chave:** confabulação virtual; memória virtual; realidade virtual; memória episódica; monitoramento de fonte; falsas memórias
 
 ---
 
-## Abstract (English)
+## Abstract
 
-The popularization of immersive virtual reality (VR) devices has raised a question that remains insufficiently theorized in cognitive psychology: the mnemonic fate of simulated experiences encoded with phenomenological features similar to those of physical events. This article proposes the construct of *virtual confabulation* (also termed *immersive autobiographical confabulation*) to designate the normative, nonpathological process by which *immersive virtual memories*, that is, episodic records formed through embodied experience in simulated environments, are retrieved and integrated into the autobiographical record of the physical world, with involuntary distortions of source, content, or temporal context. Grounded in the reconstructive model of episodic memory, the source monitoring framework, and empirical studies on confusion between VR and real-world memories, the proposal distinguishes virtual confabulation from clinical confabulation, generic false memory, and isolated source confusion. It is argued that technological immersion reduces the effectiveness of mechanisms that discriminate simulated from real experience, favoring the incorporation of immersive virtual memories into self-narrative. Implications for clinical psychology, education, forensic contexts, and technology ethics are discussed, along with methodological guidelines for the empirical operationalization of the construct.
+The popularization of immersive virtual reality (VR) devices has raised a question that remains insufficiently theorized in cognitive psychology: the mnemonic fate of simulated experiences encoded with phenomenological features similar to those of physical events. This article proposes the construct of virtual confabulation to designate the process by which virtual memories, that is, episodic records formed in simulated environments, are retrieved and integrated into the autobiographical record of the physical world, with involuntary distortions of source, content, or temporal context. Grounded in the reconstructive model of episodic memory, the source monitoring framework, and empirical studies on confusion between VR and real-world memories, the proposal distinguishes virtual confabulation from clinical confabulation, generic false memory, and isolated source confusion. It is argued that technological immersion reduces the effectiveness of mechanisms that discriminate simulated from real experience, favoring the incorporation of virtual memories into self-narrative. Implications for clinical psychology, education, forensic contexts, and technology ethics are discussed, along with methodological guidelines for the empirical operationalization of the construct.
 
-**Keywords:** virtual confabulation; immersive virtual memory; virtual reality; episodic memory; source monitoring; false memories; autobiographical memory
+**Keywords:** virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
 
 ---
 
@@ -35,11 +31,11 @@ A memória autobiográfica ocupa lugar central na organização da identidade pe
 
 Nas últimas décadas, a psicologia cognitiva investigou extensivamente falsas memórias produzidas por sugestão verbal, repetição, imaginação vívida e confusão entre fontes distintas, como fotografias, relatos de terceiros e filmes (Loftus, 2005; Johnson, Hashtroudi, & Lindsay, 1993). Em geral, essas fontes mantêm alguma distância fenomenológica da experiência direta: o sujeito tende a saber, ainda que confusamente, que viu uma imagem, ouviu uma história ou imaginou uma cena. A realidade virtual altera essa condição.
 
-Ao ocupar o campo visual, incorporar movimento corporal, simular consequências perceptivas e mobilizar respostas emocionais e autonômicas, a RV aproxima a estrutura experiencial de eventos físicos de forma sem precedente entre tecnologias midiáticas disponíveis ao público geral (Slater & Wilbur, 1997; Smith, 2019). Estudos recentes indicam que participantes confundem memórias originadas em RV com memórias de eventos físicos com frequência estatisticamente relevante (Brade et al., 2021; Brade et al., 2024). Hoffman et al. (2001) já haviam descrito o *virtual reality monitoring*, processo de discriminação entre memórias reais e virtualmente codificadas durante a recuperação. A literatura, contudo, ainda carece de um constructo que integre, em um único arcabouço teórico, a formação de memórias simuladas imersivas, sua possível integração autobiográfica e as distorções involuntárias associadas a esse processo.
+Ao ocupar o campo visual, incorporar movimento corporal, simular consequências perceptivas e mobilizar respostas emocionais e autonômicas, a RV aproxima a estrutura experiencial de eventos físicos de forma sem precedente entre tecnologias midiáticas disponíveis ao público geral (Slater & Wilbur, 1997; Smith, 2019). Estudos recentes indicam que participantes confundem memórias originadas em RV com memórias de eventos físicos com frequência estatisticamente relevante (Brade et al., 2021; Brade et al., 2024). Hoffman et al. (2001) já haviam descrito o virtual reality monitoring, isto é, o processo de discriminação entre memórias reais e virtuais durante a recuperação. A literatura, contudo, ainda carece de um constructo que integre, em um único arcabouço teórico, a formação de memórias simuladas, sua possível integração autobiográfica e as distorções involuntárias associadas a esse processo.
 
-Propomos, neste artigo, o termo *confabulação virtual* para nomear esse fenômeno. O constructo designa o deslocamento mnemônico pelo qual *memórias virtuais imersivas* deixam de ser recuperadas como registros de simulação e passam a funcionar, total ou parcialmente, como memórias de eventos ocorridos no mundo físico. A proposta não pretende substituir categorias consolidadas, mas organizá-las diante de uma nova condição tecnológica de codificação experiencial.
+Propomos, neste artigo, o termo confabulação virtual para nomear esse fenômeno. O constructo designa o deslocamento mnemônico pelo qual memórias virtuais deixam de ser recuperadas como registros de simulação e passam a funcionar, total ou parcialmente, como memórias de eventos ocorridos no mundo físico. A proposta não pretende substituir categorias consolidadas, mas organizá-las diante de uma nova condição tecnológica de codificação experiencial.
 
-Este texto tem quatro objetivos: (a) fornecer fundamentação teórica para a confabulação virtual normativa; (b) definir operacionalmente os constructos *memória virtual imersiva* e *confabulação virtual*; (c) descrever seus mecanismos e formas de manifestação; (d) indicar implicações práticas e diretrizes para investigação empírica.
+Este texto tem quatro objetivos: (a) fornecer fundamentação teórica para confabulação virtual; (b) definir operacionalmente os constructos memória virtual e confabulação virtual; (c) descrever seus mecanismos e formas de manifestação; (d) indicar implicações práticas e diretrizes para investigação empírica.
 
 ---
 
@@ -49,7 +45,7 @@ Este texto tem quatro objetivos: (a) fornecer fundamentação teórica para a co
 
 A memória episódica refere-se à capacidade de recordar eventos vividos pessoalmente, situados no tempo e no contexto (Tulving, 2002). Seu funcionamento não corresponde à simples reativação de traços mnemônicos, mas a um processo reconstrutivo guiado por esquemas, expectativas e estados afetivos presentes no momento da recuperação (Bartlett, 1932; Schacter & Addis, 2007). Detalhes plausíveis, porém inexistentes, podem ser incorporados a relatos autobiográficos sem intenção deliberada de falsificar. A memória opera, em larga medida, por coerência narrativa e não por fidelidade documental.
 
-Experiências em RV entram nesse sistema reconstrutivo portando características tipicamente associadas a eventos vividos: perspectiva egocêntrica, interação motora, feedback sensorial e modulação emocional. Quando recuperadas, tendem a ser tratadas não como informação recebida externamente, mas como matéria-prima do passado pessoal. Essa condição favorece, em princípio, a integração de memórias virtuais imersivas à autobiografia, especialmente quando o sujeito carece, no momento da recuperação, de pistas confiáveis sobre a origem simulada da experiência.
+Experiências em RV entram nesse sistema reconstrutivo portando características tipicamente associadas a eventos vividos: perspectiva egocêntrica, interação motora, feedback sensorial e modulação emocional. Quando recuperadas, tendem a ser tratadas não como informação recebida externamente, mas como matéria-prima do passado pessoal. Essa condição favorece, em princípio, a integração de memórias virtuais à autobiografia, especialmente quando o sujeito carece, no momento da recuperação, de pistas confiáveis sobre a origem simulada da experiência.
 
 ### 2.2. Monitoramento de fonte e confusão entre RV e realidade
 
@@ -57,29 +53,27 @@ Segundo o framework de monitoramento de fonte (Johnson, Hashtroudi, & Lindsay, 1
 
 A RV complica esse monitoramento porque simula precisamente as propriedades experienciais que o sistema mnemônico usa para identificar percepções verídicas. Brade et al. (2021) demonstraram que participantes confundem memórias de RV e de realidade com mais frequência do que confundem memórias de apresentação em monitor e de realidade. Brade et al. (2024), em estudo laboratorial, confirmaram a ocorrência de confusão de fonte envolvendo RV e identificaram heurísticas frágeis usadas por participantes para discriminar memórias, como suposições sobre limitações gráficas da tecnologia. Tais heurísticas perdem eficácia à medida que dispositivos imersivos se tornam mais realistas.
 
-Hoffman et al. (2001) mostraram que a discriminação entre memórias reais e virtualmente codificadas baseia-se, em parte, em diferenças nas características fenomenológicas associadas a cada fonte, conforme o modelo de Johnson e Raye (1981). Os autores também observaram, porém, que participantes atribuíam características semelhantes a falsas memórias de itens novos, sugerindo que parte do monitoramento envolve inferência reconstrutiva posterior, e não mera leitura de propriedades originalmente codificadas.
+Hoffman et al. (2001) mostraram que a discriminação entre memórias reais e virtuais baseia-se, em parte, em diferenças nas características fenomenológicas associadas a cada fonte, conforme o modelo de Johnson e Raye (1981). Os autores também observaram, porém, que participantes atribuíam características semelhantes a falsas memórias de itens novos, sugerindo que parte do monitoramento envolve inferência reconstrutiva posterior, e não mera leitura de propriedades originalmente codificadas.
 
 ### 2.3. Confabulação clínica e a extensão proposta
 
 Em neuropsicologia, confabulação designa a produção espontânea ou provocada de memórias falsas ou distorcidas, sem intenção de enganar e frequentemente acompanhada de convicção subjetiva de veracidade (Kopelman, 1987; Schnider, 2008). Classicamente associada a condições frontais, diencefálicas ou amnésicas, a confabulação clínica reflete rupturas no controle executivo sobre recuperação e verificação de conteúdos autobiográficos.
 
-A *confabulação virtual*, conforme proposta aqui, não pressupõe lesão neurológica. Trata-se de distorção mnemônica normativa, mediada por tecnologia imersiva, observável em indivíduos cognitivamente íntegros. O paralelo terminológico justifica-se pela semelhança fenomenológica: em ambos os casos, o sujeito recupera conteúdos autobiográficos incorretos sem consciência do erro e sem propósito enganoso. A diferença reside na etiologia. Na confabulação clínica, predomina disfunção orgânica; na confabulação virtual, predomina condição tecnológica de codificação experiencial.
+A confabulação virtual, conforme proposta aqui, não pressupõe lesão neurológica. Trata-se de distorção mnemônica normativa, mediada por tecnologia imersiva, observável em indivíduos cognitivamente íntegros. O paralelo terminológico justifica-se pela semelhança fenomenológica: em ambos os casos, o sujeito recupera conteúdos autobiográficos incorretos sem consciência do erro e sem propósito enganoso. A diferença reside na etiologia. Na confabulação clínica, predomina disfunção orgânica; na confabulação virtual, predomina condição tecnológica de codificação experiencial.
 
-Importante enfatizar que a proposta não medicaliza o uso de RV nem patologiza usuários saudáveis. O qualificador *normativa* é, portanto, essencial: confabulação virtual nomeia desfecho cognitivo previsível da memória reconstrutiva exposta a simulação convincente, e não síndrome psiquiátrica ou neurológica.
+Importante enfatizar que a proposta não medicaliza o uso de RV nem patologiza usuários saudáveis. Descreve, antes, efeito cognitivo previsível de um sistema de memória reconstrutivo exposto a simulações cada vez mais convincentes.
 
 ---
 
 ## 3. Definição operacional dos constructos
 
-### 3.1. Memória virtual imersiva
+### 3.1. Memória virtual
 
-Definimos **memória virtual imersiva** como o registro episódico de uma experiência codificada exclusivamente por interação imersiva em ambiente de realidade virtual, abrangendo conteúdos perceptivos, espaciais, motores, emocionais e interacionais de origem simulada. Esse termo é preferível a *memória virtual* isoladamente porque, em informática, este costuma referir-se à gestão de memória em sistemas operacionais. Memória virtual imersiva não deve ser confundida com memória de informação sobre RV (por exemplo, lembrar ter lido um artigo sobre headsets), nem com memória de conteúdo passivamente assistido em tela bidimensional. Pressupõe experiência imersiva, ainda que parcial, mediada por dispositivo de RV.
-
-Por brevidade, e quando o contexto exclui ambiguidade, usamos *memória virtual imersiva* ao longo deste artigo.
+Definimos memória virtual como o registro episódico de uma experiência codificada exclusivamente em ambiente de realidade virtual, abrangendo conteúdos perceptivos, espaciais, motores, emocionais e interacionais de origem simulada. Memória virtual não deve ser confundida com memória de informação sobre RV (por exemplo, lembrar ter lido um artigo sobre headsets), nem com memória de conteúdo passivamente assistido em tela bidimensional. Pressupõe experiência imersiva, ainda que parcial, mediada por dispositivo de RV.
 
 ### 3.2. Confabulação virtual
 
-Definimos **confabulação virtual** (também denominada **confabulação autobiográfica imersiva**) como o processo normativo e, em sentido derivado, o produto desse processo, pelo qual memórias virtuais imersivas são recuperadas, reconstruídas e integradas ao registro autobiográfico do mundo físico, produzindo uma ou mais das seguintes distorções involuntárias:
+Definimos confabulação virtual como o processo e, em sentido derivado, o produto desse processo, pelo qual memórias virtuais são recuperadas, reconstruídas e integradas ao registro autobiográfico do mundo físico, produzindo uma ou mais das seguintes distorções involuntárias:
 
 (a) atribuição incorreta de fonte, quando conteúdo de origem virtual é lembrado como evento físico;
 
@@ -87,18 +81,17 @@ Definimos **confabulação virtual** (também denominada **confabulação autobi
 
 (c) preenchimento confabulatório, quando lacunas mnemônicas são completadas com material inferido ou recombinado a partir de fragmentos simulados.
 
-Em todos os casos, a confabulação virtual envolve convicção subjetiva de veracidade e ausência de intenção de enganar. Seu critério distintivo não é mero erro de origem, mas a funcionalização da memória virtual imersiva como experiência autobiográfica do mundo físico.
+Em todos os casos, a confabulação virtual envolve convicção subjetiva de veracidade e ausência de intenção de enganar. Seu critério distintivo não é mero erro de origem, mas a funcionalização da memória virtual como experiência autobiográfica do mundo físico.
 
 ### 3.3. Síntese dos critérios diferenciais
 
 Para clareza conceitual, propomos os seguintes critérios mínimos para identificação de confabulação virtual em contextos investigativos:
 
-1. codificação original da experiência em ambiente de RV por interação imersiva;
+1. codificação original da experiência em ambiente de RV;
 2. recuperação posterior com atribuição total ou parcial ao mundo físico;
 3. ausência de intenção deliberada de falsificar;
 4. convicção subjetiva relatada ou inferida a partir do relato;
-5. distorção verificável por comparação com registro da sessão virtual, protocolo experimental ou outra fonte externa confiável;
-6. ausência de lesão neurológica ou síndrome amnésica clínica suficiente para explicar a distorção.
+5. distorção verificável por comparação com registro da sessão virtual, protocolo experimental ou outra fonte externa confiável.
 
 ---
 
@@ -108,15 +101,15 @@ Para clareza conceitual, propomos os seguintes critérios mínimos para identifi
 
 Durante o uso de headsets de RV, estímulos visuais, auditivos, proprioceptivos e emocionais são processados de forma integrada. Evidências de neuroimagem indicam sobreposição parcial entre redes ativadas por experiências reais e por tarefas imersivas em RV, especialmente em regiões associadas à memória episódica e à navegação espacial, como hipocampo e córtex parietal (Smith, 2019). Quanto maior a profundidade de processamento semântico, emocional e motor, maior a tendência à consolidação mnemônica (Craik & Lockhart, 1972).
 
-Experiências emocionalmente intensas em RV tendem a gerar memórias virtuais imersivas mais persistentes e intrusivas, por analogia a memórias flash de eventos reais (Kensinger, 2009). Conteúdos emocionalmente salientes recebem prioridade na reconstrução autobiográfica, o que aumenta a probabilidade de confabulação virtual posterior.
+Experiências emocionalmente intensas em RV tendem a gerar memórias virtuais mais persistentes e intrusivas, por analogia a memórias flash de eventos reais (Kensinger, 2009). Conteúdos emocionalmente salientes recebem prioridade na reconstrução autobiográfica, o que aumenta a probabilidade de confabulação virtual posterior.
 
 ### 4.2. Armazenamento sem rotulagem estável de origem
 
-A memória episódica não preserva de forma confiável a distinção categórica entre "real" e "virtual". Persistem, sobretudo, traços de como o evento foi experienciado: perspectiva, movimento, ativação, layout espacial, interações realizadas. Quando a simulação reproduz tais características, o engrama virtual imersivo pode tornar-se, no armazenamento, fenomenologicamente próximo a engramas de eventos físicos.
+A memória episódica não preserva de forma confiável a distinção categórica entre "real" e "virtual". Persistem, sobretudo, traços de como o evento foi experienciado: perspectiva, movimento, ativação, layout espacial, interações realizadas. Quando a simulação reproduz tais características, o engrama virtual pode tornar-se, no armazenamento, fenomenologicamente próximo a engramas de eventos físicos.
 
 ### 4.3. Recuperação reconstrutiva e integração narrativa
 
-Lembrar implica recompor o passado à luz de esquemas atuais. Memórias virtuais imersivas podem ser assimiladas a narrativas preexistentes ("sempre tive medo de altura", "já conhecia aquele tipo de ambiente"), facilitando sua incorporação como experiências reais. A busca por coerência autobiográfica descrita por Conway e Pleydell-Pearce (2000) favorece integração de material virtual compatível com a autoimagem do sujeito.
+Lembrar implica recompor o passado à luz de esquemas atuais. Memórias virtuais podem ser assimiladas a narrativas preexistentes ("sempre tive medo de altura", "já conhecia aquele tipo de ambiente"), facilitando sua incorporação como experiências reais. A busca por coerência autobiográfica descrita por Conway e Pleydell-Pearce (2000) favorece integração de material virtual compatível com a autoimagem do sujeito.
 
 ### 4.4. Falha no monitoramento de fonte
 
@@ -130,7 +123,7 @@ A confabulação virtual não constitui categoria homogênea. Propomos três for
 
 **Atribuição incorreta de fonte.** O sujeito recorda, com relativa precisão, o conteúdo da experiência virtual, mas atribui-o ao mundo físico. Exemplo: afirmar ter visitado um edifício cujo protótipo existiu apenas em simulação. Corresponde, em termos clássicos, à confusão de fonte entre RV e realidade (Brade et al., 2021).
 
-**Fusão híbrida.** Elementos de memórias virtuais imersivas combinam-se com elementos de memórias reais, produzindo eventos autobiográficos que nunca ocorreram em nenhuma modalidade isoladamente. Exemplo: lembrar uma queda na escada de casa quando a queda foi simulada em RV, mas o local lembrado corresponde à residência real.
+**Fusão híbrida.** Elementos de memórias virtuais combinam-se com elementos de memórias reais, produzindo eventos autobiográficos que nunca ocorreram em nenhuma modalidade isoladamente. Exemplo: lembrar uma queda na escada de casa quando a queda foi simulada em RV, mas o local lembrado corresponde à residência real.
 
 **Preenchimento confabulatório.** Lacunas na memória virtual ou real são completadas com conteúdo inferido ou recombinado a partir de fragmentos simulados, gerando sequências narrativas coerentes, porém fictícias. Fenomenologicamente, aproxima-se da confabulação provocada descrita em neuropsicologia, embora sem substrato orgânico identificável.
 
@@ -144,8 +137,8 @@ A confabulação virtual não constitui categoria homogênea. Propomos três for
 | Confusão de fonte | Erro na identificação da origem do engrama | Mecanismo central, mas não esgota o fenômeno |
 | Confabulação clínica | Distorção patológica após lesão | Paralelo fenomenológico; etiologia distinta |
 | Memória midiática | Registro de conteúdo passivo | Menor experiência corporal e presença |
-| Virtual reality monitoring | Discriminação entre memórias reais e virtualmente codificadas | Antecedente empírico direto |
-| Memória virtual imersiva | Produto mnemônico de experiência simulada incorporada | Estágio anterior à confabulação virtual |
+| Virtual reality monitoring | Discriminação entre memórias reais e virtuais | Antecedente empírico direto |
+| Memória virtual | Produto mnemônico de experiência simulada | Estágio anterior à confabulação virtual |
 
 A contribuição proposta consiste em nomear a trajetória completa, da codificação imersiva à integração autobiográfica incorreta, e não apenas o erro pontual de atribuição de fonte.
 
@@ -163,7 +156,7 @@ A RV é usada em protocolos de exposição para fobias, transtorno de estresse p
 
 ### 7.3. Educação e formação profissional
 
-Simulações imersivas em medicina, aviação, treinamento militar e educação histórica produzem memórias virtuais imersivas suscetíveis à confabulação. Estudantes podem recordar procedimentos, ambientes ou interações apenas simulados como experiência de campo, com implicações para avaliação de competência e distinção entre conhecimento procedural e experiência autobiográfica.
+Simulações imersivas em medicina, aviação, treinamento militar e educação histórica produzem memórias virtuais suscetíveis à confabulação. Estudantes podem recordar procedimentos, ambientes ou interações apenas simulados como experiência de campo, com implicações para avaliação de competência e distinção entre conhecimento procedural e experiência autobiográfica.
 
 ### 7.4. Contexto forense
 
@@ -205,17 +198,17 @@ Propomos paradigma com três condições: experiência imersiva em RV, vídeo 36
 
 ## 9. Limitações e agenda de pesquisa
 
-O constructo proposto permanece, nesta etapa, predominantemente teórico. Embora a literatura confirme confusão de fonte entre RV e realidade, estudos longitudinais sobre integração autobiográfica de memórias virtuais imersivas ainda são escassos. Não se sabe, com precisão, por quanto tempo tais memórias permanecem suscetíveis à confabulação, nem quais perfis individuais são mais vulneráveis.
+O constructo proposto permanece, nesta etapa, predominantemente teórico. Embora a literatura confirme confusão de fonte entre RV e realidade, estudos longitudinais sobre integração autobiográfica de memórias virtuais ainda são escassos. Não se sabe, com precisão, por quanto tempo memórias virtuais permanecem suscetíveis à confabulação, nem quais perfis individuais são mais vulneráveis.
 
 Questões em aberto incluem: crianças e adolescentes, em fase crítica de formação identitária, mostram maior susceptibilidade? A confabulação virtual decai espontaneamente ou estabiliza-se como traço mnemônico durável? Há diferenças transculturais na atribuição de veracidade a experiências simuladas? Instrumentos específicos para avaliar confabulação virtual podem ser validados psicometricamente?
 
-Investigações futuras devem combinar medidas comportamentais, autorrelato fenomenológico e, quando possível, neuroimagem funcional durante recuperação comparativa de memórias virtuais imersivas e reais.
+Investigações futuras devem combinar medidas comportamentais, autorrelato fenomenológico e, quando possível, neuroimagem funcional durante recuperação comparativa de memórias virtuais e reais.
 
 ---
 
 ## 10. Considerações finais
 
-A realidade virtual não produz apenas percepções temporárias. Produz candidatos a memórias autobiográficas. Quando o sistema mnemônico falha em rotular corretamente a origem simulada dessas experiências, memórias virtuais imersivas deslocam-se para o registro do self como se pertencessem ao mundo físico. A *confabulação virtual*, entendida como confabulação autobiográfica imersiva normativa, nomeia esse processo.
+A realidade virtual não produz apenas percepções temporárias. Produz candidatos a memórias autobiográficas. Quando o sistema mnemônico falha em rotular corretamente a origem simulada dessas experiências, memórias virtuais deslocam-se para o registro do self como se pertencessem ao mundo físico. A confabulação virtual, conforme proposta aqui, nomeia esse processo.
 
 Trata-se de fenômeno distinto da confabulação clínica, embora fenomenologicamente convergente, e distinto da falsa memória genérica, embora mecanisticamente relacionado. Sua especificidade reside na mediação tecnológica imersiva e na produção de memórias que nascem virtuais e, na recuperação, confabulam-se no passado real.
 
