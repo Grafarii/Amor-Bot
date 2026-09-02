@@ -19,6 +19,14 @@ Palavras-chave: confabulação virtual; memória virtual; realidade virtual; mem
 
 ---
 
+## Abstract
+
+The popularization of immersive virtual reality (VR) devices has raised a question that remains insufficiently theorized in cognitive psychology: the mnemonic fate of simulated experiences encoded with phenomenological features similar to those of physical events. This article proposes the construct of virtual confabulation to designate the process by which virtual memories, that is, episodic records formed in simulated environments, are retrieved and integrated into the autobiographical record of the physical world, with involuntary distortions of source, content, or temporal context. Grounded in the reconstructive model of episodic memory, the source monitoring framework, and empirical studies on confusion between VR and real-world memories, the proposal distinguishes virtual confabulation from clinical confabulation, generic false memory, and isolated source confusion. It is argued that technological immersion reduces the effectiveness of mechanisms that discriminate simulated from real experience, favoring the incorporation of virtual memories into self-narrative. Implications for clinical psychology, education, forensic contexts, and technology ethics are discussed, along with methodological guidelines for the empirical operationalization of the construct.
+
+Keywords: virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
+
+---
+
 ## 1. Introdução
 
 A memória autobiográfica ocupa lugar central na organização da identidade pessoal. Longe de funcionar como registro fiel de eventos passados, opera como sistema reconstrutivo, suscetível a omissões, distorções e integrações narrativas que visam preservar a coerência subjetiva do self (Conway & Pleydell-Pearce, 2000; Schacter & Addis, 2007). Essa plasticidade, em condições ordinárias, não constitui patologia. Reflete, antes, a adaptabilidade de um sistema evolutivamente orientado à orientação presente e futura, e não à preservação histórica exata (Schacter, 1999).
