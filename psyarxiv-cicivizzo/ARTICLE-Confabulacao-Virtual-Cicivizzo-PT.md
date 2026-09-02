@@ -1,6 +1,6 @@
 # Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas originadas na realidade virtual ao registro autobiográfico
 
-**André Cicivizzo**  
+André Cicivizzo
 Graduando em Psicologia  
 Universidade Paulista (UNIP)  
 São Paulo, SP, Brasil  
@@ -13,7 +13,7 @@ ORCID: https://orcid.org/0009-0008-8414-8403
 
 A popularização de dispositivos de realidade virtual (RV) imersiva levantou uma questão ainda insuficientemente teorizada na psicologia cognitiva: o destino mnemônico de experiências simuladas codificadas com características fenomenológicas semelhantes às de eventos físicos. Este artigo propõe o constructo de confabulação virtual para designar o processo pelo qual memórias virtuais, isto é, registros episódicos formados em ambientes simulados, são recuperados e integrados ao registro autobiográfico do mundo físico, com distorções involuntárias de fonte, conteúdo ou contexto temporal. Ancorada no modelo reconstrutivo da memória episódica, no framework de monitoramento de fonte e em estudos empíricos sobre confusão entre memórias de RV e do mundo real, a proposta distingue confabulação virtual de confabulação clínica, falsa memória genérica e confusão de fonte isolada. Argumenta-se que a imersão tecnológica reduz a eficácia dos mecanismos que discriminam experiência simulada de experiência real, favorecendo a incorporação de memórias virtuais à auto-narrativa. Implicações para psicologia clínica, educação, contextos forenses e ética tecnológica são discutidas, com diretrizes metodológicas para operacionalização empírica do constructo.
 
-**Palavras-chave:** confabulação virtual; memória virtual; realidade virtual; memória episódica; monitoramento de fonte; falsas memórias
+Palavras-chave: confabulação virtual; memória virtual; realidade virtual; memória episódica; monitoramento de fonte; falsas memórias
 
 ---
 
@@ -21,7 +21,7 @@ A popularização de dispositivos de realidade virtual (RV) imersiva levantou um
 
 The popularization of immersive virtual reality (VR) devices has raised a question that remains insufficiently theorized in cognitive psychology: the mnemonic fate of simulated experiences encoded with phenomenological features similar to those of physical events. This article proposes the construct of virtual confabulation to designate the process by which virtual memories, that is, episodic records formed in simulated environments, are retrieved and integrated into the autobiographical record of the physical world, with involuntary distortions of source, content, or temporal context. Grounded in the reconstructive model of episodic memory, the source monitoring framework, and empirical studies on confusion between VR and real-world memories, the proposal distinguishes virtual confabulation from clinical confabulation, generic false memory, and isolated source confusion. It is argued that technological immersion reduces the effectiveness of mechanisms that discriminate simulated from real experience, favoring the incorporation of virtual memories into self-narrative. Implications for clinical psychology, education, forensic contexts, and technology ethics are discussed, along with methodological guidelines for the empirical operationalization of the construct.
 
-**Keywords:** virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
+Keywords: virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
 
 ---
 
