@@ -7,7 +7,7 @@ São Paulo, SP, Brasil
 E-mail: andre.cicivizzo@outlook.com  
 ORCID: https://orcid.org/0009-0008-8414-8403
 
-Virtual Confabulation: A Construct Proposal on the Integration of Episodic Memories Originated in Virtual Reality into the Autobiographical Record
+Título em inglês: Virtual Confabulation: A Construct Proposal on the Integration of Episodic Memories Originated in Virtual Reality into the Autobiographical Record
 
 ---
 
@@ -19,11 +19,11 @@ Palavras-chave: confabulação virtual; memória virtual; realidade virtual; mem
 
 ---
 
-## Abstract
+## Resumo em inglês
 
 The popularization of immersive virtual reality (VR) devices has raised a question that remains insufficiently theorized in cognitive psychology: the mnemonic fate of simulated experiences encoded with phenomenological features similar to those of physical events. This article proposes the construct of virtual confabulation to designate the process by which virtual memories, that is, episodic records formed in simulated environments, are retrieved and integrated into the autobiographical record of the physical world, with involuntary distortions of source, content, or temporal context. Grounded in the reconstructive model of episodic memory, the source monitoring framework, and empirical studies on confusion between VR and real-world memories, the proposal distinguishes virtual confabulation from clinical confabulation, generic false memory, and isolated source confusion. It is argued that technological immersion reduces the effectiveness of mechanisms that discriminate simulated from real experience, favoring the incorporation of virtual memories into self-narrative. Implications for clinical psychology, education, forensic contexts, and technology ethics are discussed, along with methodological guidelines for the empirical operationalization of the construct.
 
-Keywords: virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
+Palavras-chave em inglês: virtual confabulation; virtual memory; virtual reality; episodic memory; source monitoring; false memories
 
 ---
 
