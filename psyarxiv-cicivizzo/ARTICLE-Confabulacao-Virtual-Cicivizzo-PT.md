@@ -1,11 +1,13 @@
 # Confabulação virtual: proposta de constructo sobre a integração de memórias episódicas originadas na realidade virtual ao registro autobiográfico
 
-André Cicivizzo
+André Cicivizzo  
 Graduando em Psicologia  
 Universidade Paulista (UNIP)  
 São Paulo, SP, Brasil  
 E-mail: andre.cicivizzo@outlook.com  
 ORCID: https://orcid.org/0009-0008-8414-8403
+
+Virtual Confabulation: A Construct Proposal on the Integration of Episodic Memories Originated in Virtual Reality into the Autobiographical Record
 
 ---
 
@@ -235,6 +237,12 @@ Trata-se de artigo teórico. Nenhum participante humano ou animal esteve envolvi
 ## Disponibilidade de dados
 
 Não aplicável. Nenhum conjunto de dados foi gerado ou analisado neste artigo teórico.
+
+---
+
+## Declaração de uso de Inteligência Artificial
+
+O autor declara que não utilizou ferramentas de inteligência artificial generativa na elaboração do conteúdo científico deste manuscrito. A conceituação do constructo, a revisão da literatura e a redação são de autoria própria.
 
 ---
 
