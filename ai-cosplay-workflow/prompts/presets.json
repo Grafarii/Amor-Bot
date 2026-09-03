@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "description": "Prompt presets for 2.5D photoreal cosplay style. Paste POSITIVE into CLIP Text Encode. Leave NEGATIVE empty for FLUX.",
+  "global_suffix": "professional cosplay photograph, soft natural window light, warm wooden floor, sheer white curtains, shallow depth of field, 35mm lens, high detail fabric texture, realistic skin pores, masterpiece quality",
+  "presets": [
+    {
+      "id": "catgirl-cheongsam-pose",
+      "name": "Blue hair catgirl · cheongsam · floor pose",
+      "inspired_by": "First reference image style",
+      "positive": "A cosplay photograph of a young woman with light blue bob hair, white cat ears with pink inner fur, small band-aid on nose bridge, hair clips and tiny flower accessories. She wears a white short-sleeve cheongsam-style top with red frog buttons and ruffled hem, sheer white thigh-high stockings. She lies on a dark polished wooden floor in a bright modern living room, large floor-to-ceiling windows with sheer curtains behind her, soft afternoon backlight, grey sofa and round gold table blurred in background. Extreme flexible contortion pose, low camera angle near floor level, full body in frame, photorealistic cosplay, anime-inspired face with realistic skin",
+      "negative": "",
+      "settings": {
+        "width": 1024,
+        "height": 768,
+        "guidance": 3.8,
+        "steps": 24,
+        "lora_strength": 0.65
+      }
+    },
+    {
+      "id": "maid-blue-hair-low-angle",
+      "name": "Blue hair maid · low angle · foot foreground",
+      "inspired_by": "Second reference image style",
+      "positive": "A cosplay photograph of a young woman with long wavy blue hair and straight bangs, white lace maid headband, subtle aquatic fin-like ears. Navy blue maid dress with white lace apron, keyhole chest cutout with gold buttons, navy bow with gold brooch, white lace cuffs, sheer white stockings. She sits on a light wooden floor, legs spread, one foot extremely close to camera creating strong foreshortening, low angle upward view. Bright backlit room with floor-to-ceiling sheer white curtains, soft diffused daylight, clean minimal interior, photorealistic cosplay photo, anime face proportions with realistic lighting and fabric",
+      "negative": "",
+      "settings": {
+        "width": 832,
+        "height": 1216,
+        "guidance": 4.0,
+        "steps": 26,
+        "lora_strength": 0.7
+      }
+    },
+    {
+      "id": "generic-cosplay-portrait",
+      "name": "Generic indoor cosplay portrait",
+      "positive": "Cosplay photograph of one person, original character, detailed costume, indoor natural light, sitting on wooden floor, relaxed pose, looking at camera, soft smile, professional photography, realistic skin and fabric, anime-inspired facial features",
+      "negative": "",
+      "settings": {
+        "width": 832,
+        "height": 1216,
+        "guidance": 3.5,
+        "steps": 22,
+        "lora_strength": 0.6
+      }
+    }
+  ],
+  "quality_tags_optional": [
+    "Avoid over-stacking: FLUX prefers natural language over (tag:1.2) syntax",
+    "If face is too smooth: add 'visible skin texture, subtle pores, natural makeup'",
+    "If too dark: add 'high-key lighting, bright airy room'",
+    "If hands/feet fail: simplify pose or lower guidance to 3.0"
+  ]
+}
