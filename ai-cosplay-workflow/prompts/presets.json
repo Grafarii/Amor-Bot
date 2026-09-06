@@ -1,0 +1,90 @@
+{
+  "version": 2,
+  "description": "Prompt presets for 2.5D photoreal cosplay. Paste POSITIVE into CLIP Text Encode. Leave NEGATIVE empty — workflows use ConditioningZeroOut.",
+  "global_suffix": "professional cosplay photograph, soft natural window light, warm wooden floor, sheer white curtains, shallow depth of field, 35mm lens, high detail fabric texture, realistic skin pores, natural makeup, masterpiece quality",
+  "presets": [
+    {
+      "id": "maid-blue-hair-low-angle",
+      "name": "Blue hair maid · low angle",
+      "tier": "hero",
+      "positive": "A professional cosplay photograph of a young woman with long wavy blue hair and straight bangs, white lace maid headband. Navy blue maid dress with white lace apron, keyhole chest cutout with gold buttons, navy bow with gold brooch, white lace cuffs, sheer white stockings. She sits on a light wooden floor with one knee raised, looking at the camera, low angle upward view. Bright backlit room with floor-to-ceiling sheer white curtains, soft diffused daylight, clean minimal interior, photorealistic cosplay photo, anime-inspired face with realistic lighting and fabric",
+      "negative": "",
+      "settings": {
+        "width": 832,
+        "height": 1216,
+        "guidance": 3.5,
+        "steps_pass1": 28,
+        "denoise_pass2": 0.35,
+        "lora_strength": 0.6
+      }
+    },
+    {
+      "id": "catgirl-cheongsam-floor",
+      "name": "Blue hair catgirl · cheongsam · floor",
+      "tier": "hero",
+      "positive": "A cosplay photograph of a young woman with light blue bob hair, white cat ears with pink inner fur, small band-aid on nose bridge, hair clips and tiny flower accessories. She wears a white short-sleeve cheongsam-style top with red frog buttons and ruffled hem, sheer white thigh-high stockings. She reclines on a dark polished wooden floor in a bright modern living room, torso propped on elbows, legs bent naturally, large floor-to-ceiling windows with sheer curtains behind her, soft afternoon backlight, grey sofa and round gold table blurred in background. Low camera angle near floor level, full body in frame, two arms two legs only, natural hands, photorealistic cosplay, anime-inspired face with realistic skin",
+      "negative": "",
+      "settings": {
+        "width": 1024,
+        "height": 768,
+        "guidance": 3.5,
+        "steps_pass1": 28,
+        "denoise_pass2": 0.35,
+        "lora_strength": 0.65
+      }
+    },
+    {
+      "id": "cheongsam-standing-portrait",
+      "name": "Cheongsam standing portrait",
+      "tier": "standard",
+      "positive": "Full-body cosplay photograph of a young woman with light blue hair and subtle cat ears, white and red cheongsam dress with frog buttons, standing beside a bright window with sheer curtains, soft backlight rim on hair, wooden floor, 35mm lens, shallow depth of field, realistic skin texture, detailed silk fabric, photorealistic cosplay",
+      "negative": "",
+      "settings": {
+        "width": 832,
+        "height": 1216,
+        "guidance": 3.4,
+        "steps_pass1": 24,
+        "denoise_pass2": 0.32,
+        "lora_strength": 0.55
+      }
+    },
+    {
+      "id": "generic-indoor-cosplay",
+      "name": "Generic indoor cosplay portrait",
+      "tier": "standard",
+      "positive": "Cosplay photograph of one person, original character, detailed costume, indoor natural light, sitting on wooden floor, relaxed pose, looking at camera, soft smile, professional photography, realistic skin and fabric, anime-inspired facial features, 35mm lens",
+      "negative": "",
+      "settings": {
+        "width": 832,
+        "height": 1216,
+        "guidance": 3.3,
+        "steps_pass1": 24,
+        "denoise_pass2": 0.3,
+        "lora_strength": 0.5
+      }
+    },
+    {
+      "id": "closeup-face-detail",
+      "name": "Close-up face detail (for img2img face pass)",
+      "tier": "utility",
+      "positive": "Close-up portrait of the same cosplayer, natural skin pores, subtle freckles, realistic eye reflections, soft window light, sharp focus on eyes, photorealistic, 85mm lens",
+      "negative": "",
+      "settings": {
+        "width": 1024,
+        "height": 1024,
+        "guidance": 3.0,
+        "steps_pass1": 22,
+        "denoise_pass2": 0.25,
+        "lora_strength": 0.4
+      }
+    }
+  ],
+  "tips": [
+    "FLUX prefers full sentences over (tag:1.2) weighting.",
+    "If face is too smooth: add 'visible skin texture, subtle pores, natural makeup'.",
+    "If too dark: add 'high-key lighting, bright airy room'.",
+    "If hands fail: simplify pose, lower guidance to 3.0, or img2img the hands region.",
+    "Avoid extreme contortion wording — it causes extra limbs. Anchor pose with elbows/knees explicitly.",
+    "Fix a seed when you find a good face, then only change costume/background sentences."
+  ]
+}

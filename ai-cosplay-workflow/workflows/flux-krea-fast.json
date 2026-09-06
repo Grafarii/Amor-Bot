@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "title": "FLUX.1 Krea Fast — single-pass",
+    "description": "One-shot Krea generation. Best speed/quality balance when you do not need the refine pass.",
+    "recommended_vram_gb": 12
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux1-krea-dev_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["1", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "A professional cosplay photograph of a young woman with light blue bob hair and white cat ears, white short-sleeve cheongsam-style top with red frog buttons, sheer white thigh-high stockings, sitting on polished wooden floor, bright living room with sheer curtains and soft afternoon window backlight, low angle, 35mm lens, shallow depth of field, realistic skin pores, photorealistic cosplay",
+      "clip": ["2", 0]
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "",
+      "clip": ["2", 0]
+    }
+  },
+  "7": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["5", 0],
+      "guidance": 3.5
+    }
+  },
+  "8": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": ["6", 0]
+    }
+  },
+  "9": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 832,
+      "height": 1216,
+      "batch_size": 1
+    }
+  },
+  "10": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 24,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["4", 0],
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "latent_image": ["9", 0]
+    }
+  },
+  "11": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["10", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "12": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "cosplay_krea_fast",
+      "images": ["11", 0]
+    }
+  }
+}

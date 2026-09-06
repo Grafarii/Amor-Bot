@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "title": "FLUX.1 Krea Img2Img — refine / restyle",
+    "description": "Load a reference cosplay photo, encode, and regenerate with controlled denoise. denoise 0.35 keeps identity; 0.55–0.7 restyles harder.",
+    "recommended_vram_gb": 12
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux1-krea-dev_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "reference_cosplay.png"
+    }
+  },
+  "5": {
+    "class_type": "ImageScale",
+    "inputs": {
+      "image": ["4", 0],
+      "upscale_method": "lanczos",
+      "width": 832,
+      "height": 1216,
+      "crop": "center"
+    }
+  },
+  "6": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["5", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "7": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["1", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  "8": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "Same person and pose as the reference, professional cosplay photograph, soft window backlight, sheer white curtains, warm wooden floor, realistic skin texture, detailed costume fabric, 35mm lens, shallow depth of field, photorealistic",
+      "clip": ["2", 0]
+    }
+  },
+  "9": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "",
+      "clip": ["2", 0]
+    }
+  },
+  "10": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["8", 0],
+      "guidance": 3.2
+    }
+  },
+  "11": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": ["9", 0]
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 24,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.4,
+      "model": ["7", 0],
+      "positive": ["10", 0],
+      "negative": ["11", 0],
+      "latent_image": ["6", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "cosplay_krea_img2img",
+      "images": ["13", 0]
+    }
+  }
+}
