@@ -1,0 +1,151 @@
+{
+  "_meta": {
+    "title": "FLUX.1 Krea + Dual LoRA — cosplay realism",
+    "description": "Krea base with two LoRA slots (realism + costume). Set unused LoRA strength to 0 and pick any valid .safetensors file, or replace names after download.",
+    "recommended_vram_gb": 16
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux1-krea-dev.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "t5xxl_fp16.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": ["1", 0],
+      "lora_name": "flux_realism.safetensors",
+      "strength_model": 0.65
+    }
+  },
+  "5": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": ["4", 0],
+      "lora_name": "flux_cosplay.safetensors",
+      "strength_model": 0.55
+    }
+  },
+  "6": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["5", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "A professional cosplay photograph of a young woman with long wavy blue hair, white lace maid headband, navy blue maid dress with white lace apron and gold brooch, sheer white stockings, sitting on light wooden floor, bright backlit sheer curtains, low angle, 35mm lens, shallow depth of field, realistic skin texture, detailed lace and fabric, photorealistic cosplay photo",
+      "clip": ["2", 0]
+    }
+  },
+  "8": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "",
+      "clip": ["2", 0]
+    }
+  },
+  "9": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["7", 0],
+      "guidance": 3.8
+    }
+  },
+  "10": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": ["8", 0]
+    }
+  },
+  "11": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 832,
+      "height": 1216,
+      "batch_size": 1
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 26,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["6", 0],
+      "positive": ["9", 0],
+      "negative": ["10", 0],
+      "latent_image": ["11", 0]
+    }
+  },
+  "13": {
+    "class_type": "LatentUpscaleBy",
+    "inputs": {
+      "samples": ["12", 0],
+      "upscale_method": "bislerp",
+      "scale_by": 1.5
+    }
+  },
+  "14": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["5", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 1248,
+      "height": 1824
+    }
+  },
+  "15": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 18,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.32,
+      "model": ["14", 0],
+      "positive": ["9", 0],
+      "negative": ["10", 0],
+      "latent_image": ["13", 0]
+    }
+  },
+  "16": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["15", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "17": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "cosplay_krea_lora",
+      "images": ["16", 0]
+    }
+  }
+}

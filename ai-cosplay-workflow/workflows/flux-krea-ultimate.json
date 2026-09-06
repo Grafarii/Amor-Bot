@@ -1,0 +1,135 @@
+{
+  "_meta": {
+    "title": "FLUX.1 Krea Ultimate — 2-pass photoreal cosplay",
+    "description": "Best quality path that always runs: Krea + ModelSamplingFlux → base pass → latent 1.5× refine. No LoRA or upscaler required.",
+    "recommended_vram_gb": 16
+  },
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "flux1-krea-dev.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "t5xxl_fp16.safetensors",
+      "clip_name2": "clip_l.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["1", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 832,
+      "height": 1216
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "A professional cosplay photograph of a young woman with long wavy blue hair and white lace maid headband. She wears a navy blue maid dress with white lace apron, sheer white stockings, sitting on a light wooden floor in a bright living room. Soft natural window backlight through sheer white curtains, low camera angle, 35mm lens, shallow depth of field, realistic skin texture with subtle pores, detailed fabric weave, photorealistic anime-inspired face, DSLR cosplay photo",
+      "clip": ["2", 0]
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "",
+      "clip": ["2", 0]
+    }
+  },
+  "7": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["5", 0],
+      "guidance": 3.5
+    }
+  },
+  "8": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": ["6", 0]
+    }
+  },
+  "9": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 832,
+      "height": 1216,
+      "batch_size": 1
+    }
+  },
+  "10": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 28,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["4", 0],
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "latent_image": ["9", 0]
+    }
+  },
+  "11": {
+    "class_type": "LatentUpscaleBy",
+    "inputs": {
+      "samples": ["10", 0],
+      "upscale_method": "bislerp",
+      "scale_by": 1.5
+    }
+  },
+  "12": {
+    "class_type": "ModelSamplingFlux",
+    "inputs": {
+      "model": ["1", 0],
+      "max_shift": 1.15,
+      "base_shift": 0.5,
+      "width": 1248,
+      "height": 1824
+    }
+  },
+  "13": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 424242,
+      "steps": 20,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.35,
+      "model": ["12", 0],
+      "positive": ["7", 0],
+      "negative": ["8", 0],
+      "latent_image": ["11", 0]
+    }
+  },
+  "14": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["13", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "15": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "cosplay_krea_ultimate",
+      "images": ["14", 0]
+    }
+  }
+}
