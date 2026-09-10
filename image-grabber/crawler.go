@@ -215,7 +215,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				unmark()
 			}
 			wg.Done()
-			if !cfg.neverDropQueue() {
+			if ctx.Err() == nil && !cfg.neverDropQueue() {
 				log("warn", "queue full, dropped "+j.url)
 			}
 		}
