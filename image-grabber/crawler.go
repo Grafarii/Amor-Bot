@@ -40,21 +40,21 @@ type Config struct {
 type LogFn func(kind, msg string)
 
 type Stats struct {
-	Pages     atomic.Int64
-	Found     atomic.Int64
-	Saved     atomic.Int64
-	Skipped   atomic.Int64
-	Hidden    atomic.Int64
-	Errors    atomic.Int64
+	Pages   atomic.Int64
+	Found   atomic.Int64
+	Saved   atomic.Int64
+	Skipped atomic.Int64
+	Hidden  atomic.Int64
+	Errors  atomic.Int64
 }
 
 type ManifestEntry struct {
-	File     string `json:"file"`
-	URL      string `json:"url,omitempty"`
-	Page     string `json:"page"`
-	Via      string `json:"via"`
-	Hidden   bool   `json:"hidden"`
-	Bytes    int    `json:"bytes"`
+	File   string `json:"file"`
+	URL    string `json:"url,omitempty"`
+	Page   string `json:"page"`
+	Via    string `json:"via"`
+	Hidden bool   `json:"hidden"`
+	Bytes  int    `json:"bytes"`
 }
 
 type jobKind int

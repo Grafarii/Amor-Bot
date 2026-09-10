@@ -55,9 +55,10 @@ func (h *sseHub) send(v any) {
 }
 
 type guiState struct {
-	mu      sync.Mutex
-	running bool
-	cancel  context.CancelFunc
+	mu       sync.Mutex
+	running  bool
+	cancel   context.CancelFunc
+	unlocked bool
 }
 
 type startReq struct {
@@ -73,6 +74,7 @@ type startReq struct {
 	SaveDataURI   bool   `json:"saveDataUri"`
 	RespectRobots bool   `json:"respectRobots"`
 	DelayMs       int    `json:"delayMs"`
+	Password      string `json:"password"`
 }
 
 func runGUI(web fs.FS) error {
@@ -86,8 +88,17 @@ func runGUI(web fs.FS) error {
 		if p, err := os.Executable(); err == nil {
 			exeDir = filepath.Dir(p)
 		}
+		st.mu.Lock()
+		unlocked := st.unlocked
+		st.mu.Unlock()
 		writeJSON(w, map[string]any{
-			"outDir": filepath.Join(exeDir, "grabbed-images"),
+			"outDir":        filepath.Join(exeDir, "grabbed-images"),
+			"unlocked":      unlocked,
+			"safeMaxDepth":  safeMaxDepth,
+			"safeMaxPages":  safeMaxPages,
+			"safeMinDelay":  safeMinDelay,
+			"adminMaxDepth": adminMaxDepth,
+			"adminMaxPages": adminMaxPages,
 		})
 	})
 	mux.HandleFunc("/api/events", func(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +127,27 @@ func runGUI(web fs.FS) error {
 			}
 		}
 	})
+	mux.HandleFunc("/api/unlock", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "POST only", 405)
+			return
+		}
+		var req struct {
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "bad json", 400)
+			return
+		}
+		if !passwordOK(req.Password) {
+			http.Error(w, "wrong password", 401)
+			return
+		}
+		st.mu.Lock()
+		st.unlocked = true
+		st.mu.Unlock()
+		writeJSON(w, map[string]any{"ok": true, "unlocked": true})
+	})
 	mux.HandleFunc("/api/start", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "POST only", 405)
@@ -131,6 +163,10 @@ func runGUI(web fs.FS) error {
 			st.mu.Unlock()
 			http.Error(w, "already running", 409)
 			return
+		}
+		unlocked := st.unlocked || passwordOK(req.Password)
+		if unlocked {
+			st.unlocked = true
 		}
 		ctx, cancel := context.WithCancel(context.Background())
 		st.running = true
@@ -156,6 +192,7 @@ func runGUI(web fs.FS) error {
 		if req.DelayMs >= 0 {
 			cfg.DelayMs = req.DelayMs
 		}
+		boundMsg := applyBounds(&cfg, unlocked)
 
 		go func() {
 			defer func() {
@@ -167,6 +204,7 @@ func runGUI(web fs.FS) error {
 			log := func(kind, msg string) {
 				hub.send(map[string]any{"type": "log", "kind": kind, "msg": msg, "at": time.Now().Format("15:04:05")})
 			}
+			log("info", boundMsg)
 			stats, err := Run(ctx, cfg, log)
 			if err != nil {
 				hub.send(map[string]any{"type": "error", "msg": err.Error()})
@@ -213,6 +251,7 @@ func runGUI(web fs.FS) error {
 	fmt.Println("Site Image Grabber")
 	fmt.Println("Open this page if the browser does not appear:")
 	fmt.Println("  " + url)
+	fmt.Println("Testing limits are locked. Unlock in the UI with the admin password.")
 	fmt.Println("Close this window or press Ctrl+C to quit.")
 	openBrowser(url)
 	return http.Serve(ln, mux)

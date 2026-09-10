@@ -19,6 +19,17 @@ A `_manifest.json` file is written next to the downloads so you can see **where*
 
 Only use this on sites you own or have permission to copy.
 
+## Admin testing password
+
+Safe mode (default) stays on the same site, respects `robots.txt`, and caps depth at 4 / 500 pages.
+
+Unlock those limits with the admin password **`batata`**:
+
+- In the UI: Admin password → **Unlock limits**
+- CLI: `-admin-password batata`
+
+You can override the password with the `GRABBER_ADMIN_PASSWORD` environment variable.
+
 ## Run the .exe (Windows)
 
 1. Download `SiteImageGrabber.exe` from this folder’s `dist/` directory (or from the **Build Image Grabber** GitHub Action artifact).
