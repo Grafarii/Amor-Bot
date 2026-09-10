@@ -559,7 +559,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		log("info", "using session cookies")
 	}
 	doLogin(ctx, client, cfg, log)
-	log("info", "starting at "+start.String()+" — scraping images from the page and its directories")
+	log("info", "starting at "+start.String()+" — collecting every image this site publishes")
 	enqueue(job{kind: jobPage, url: start.String(), depth: 0, via: "start", page: start.String()})
 	if dir := listingURLFromStart(start); dir != "" && dir != start.String() {
 		enqueue(job{kind: jobPage, url: dir, depth: 0, via: "page-index", page: start.String()})
