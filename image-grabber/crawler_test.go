@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -112,5 +113,61 @@ func TestCrawlHiddenIndexAndAssets(t *testing.T) {
 		if !strings.Contains(joined, needle) {
 			t.Errorf("manifest missing %s\n%s", needle, joined)
 		}
+	}
+}
+
+func TestPreviewSinkDoesNotWriteFiles(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><img src="/visible.png"><div hidden><img src="/hidden.png"></div></body></html>`))
+	})
+	servePNG := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	}
+	mux.HandleFunc("/visible.png", servePNG)
+	mux.HandleFunc("/hidden.png", servePNG)
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	out := t.TempDir()
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.OutDir = out
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	stats, err := Run(ctx, cfg, func(string, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Saved.Load() != 0 {
+		t.Fatalf("preview mode should not save, got %d", stats.Saved.Load())
+	}
+	entries, _ := os.ReadDir(out)
+	if len(entries) != 0 {
+		t.Fatalf("preview mode wrote files: %v", entries)
+	}
+	mu.Lock()
+	n := len(got)
+	mu.Unlock()
+	if n < 2 {
+		t.Fatalf("expected collected images, got %d", n)
 	}
 }

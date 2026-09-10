@@ -35,6 +35,20 @@ type Config struct {
 	Concurrency   int
 	DelayMs       int
 	MaxBytes      int64
+	Sink          func(CollectedImage) `json:"-"`
+}
+
+type CollectedImage struct {
+	ID          int    `json:"id"`
+	URL         string `json:"url"`
+	Page        string `json:"page"`
+	Via         string `json:"via"`
+	Hidden      bool   `json:"hidden"`
+	Bytes       int    `json:"bytes"`
+	ContentType string `json:"contentType"`
+	Name        string `json:"name"`
+	Preview     string `json:"preview"`
+	Data        []byte `json:"-"`
 }
 
 type LogFn func(kind, msg string)
@@ -107,11 +121,14 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 	if start.Scheme != "http" && start.Scheme != "https" {
 		return nil, fmt.Errorf("only http and https URLs are supported")
 	}
-	if cfg.OutDir == "" {
-		cfg.OutDir = "grabbed-images"
-	}
-	if err := os.MkdirAll(cfg.OutDir, 0o755); err != nil {
-		return nil, err
+	preview := cfg.Sink != nil
+	if !preview {
+		if cfg.OutDir == "" {
+			cfg.OutDir = "grabbed-images"
+		}
+		if err := os.MkdirAll(cfg.OutDir, 0o755); err != nil {
+			return nil, err
+		}
 	}
 	if cfg.Concurrency < 1 {
 		cfg.Concurrency = 4
@@ -148,6 +165,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		wg        sync.WaitGroup
 		pagesLeft = int64(cfg.MaxPages)
 		delay     = time.Duration(cfg.DelayMs) * time.Millisecond
+		nextID    atomic.Int64
 	)
 
 	enqueue := func(j job) {
@@ -221,7 +239,33 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if len(body) == 0 {
 			return
 		}
-		name, err := writeImageFile(cfg.OutDir, hit, body, contentType)
+		name := suggestedName(hit, body, contentType)
+		if preview {
+			if hit.Hidden {
+				stats.Hidden.Add(1)
+			}
+			id := int(nextID.Add(1))
+			img := CollectedImage{
+				ID:          id,
+				URL:         hit.URL,
+				Page:        hit.Page,
+				Via:         hit.Via,
+				Hidden:      hit.Hidden,
+				Bytes:       len(body),
+				ContentType: contentType,
+				Name:        filepath.ToSlash(name),
+				Preview:     fmt.Sprintf("/api/image/%d", id),
+				Data:        body,
+			}
+			cfg.Sink(img)
+			mark := ""
+			if hit.Hidden {
+				mark = " [hidden]"
+			}
+			log("found", filepath.Base(name)+" ← "+hit.Via+mark)
+			return
+		}
+		written, err := writeImageFile(cfg.OutDir, hit, body, contentType)
 		if err != nil {
 			stats.Errors.Add(1)
 			log("error", err.Error())
@@ -232,9 +276,9 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 			stats.Hidden.Add(1)
 		}
 		mu.Lock()
-		savedPath[hit.URL] = name
+		savedPath[hit.URL] = written
 		manifest = append(manifest, ManifestEntry{
-			File:   name,
+			File:   written,
 			URL:    hit.URL,
 			Page:   hit.Page,
 			Via:    hit.Via,
@@ -246,7 +290,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if hit.Hidden {
 			mark = " [hidden]"
 		}
-		log("save", filepath.Base(name)+" ← "+hit.Via+mark)
+		log("save", filepath.Base(written)+" ← "+hit.Via+mark)
 	}
 
 	fetch := func(raw string) ([]byte, string, *url.URL, error) {
@@ -491,14 +535,21 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		<-done
 	}
 
-	mu.Lock()
-	man := manifest
-	mu.Unlock()
-	if data, err := json.MarshalIndent(man, "", "  "); err == nil {
-		_ = os.WriteFile(filepath.Join(cfg.OutDir, "_manifest.json"), data, 0o644)
+	if !preview {
+		mu.Lock()
+		man := manifest
+		mu.Unlock()
+		if data, err := json.MarshalIndent(man, "", "  "); err == nil {
+			_ = os.WriteFile(filepath.Join(cfg.OutDir, "_manifest.json"), data, 0o644)
+		}
 	}
-	log("info", fmt.Sprintf("done — %d pages, %d found, %d saved (%d hidden), %d errors",
-		stats.Pages.Load(), stats.Found.Load(), stats.Saved.Load(), stats.Hidden.Load(), stats.Errors.Load()))
+	if preview {
+		log("info", fmt.Sprintf("done — %d pages, %d found (%d hidden), %d errors — not saved yet",
+			stats.Pages.Load(), stats.Found.Load(), stats.Hidden.Load(), stats.Errors.Load()))
+	} else {
+		log("info", fmt.Sprintf("done — %d pages, %d found, %d saved (%d hidden), %d errors",
+			stats.Pages.Load(), stats.Found.Load(), stats.Saved.Load(), stats.Hidden.Load(), stats.Errors.Load()))
+	}
 	return stats, nil
 }
 

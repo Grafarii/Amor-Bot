@@ -17,6 +17,8 @@ Windows app that crawls a website (or a directory index) and downloads **every i
 
 A `_manifest.json` file is written next to the downloads so you can see **where** each image came from.
 
+The desktop UI **does not save immediately**. Images appear in a gallery at the bottom; use **Save selected** or **Save all** to write files.
+
 Only use this on sites you own or have permission to copy.
 
 ## Admin testing password

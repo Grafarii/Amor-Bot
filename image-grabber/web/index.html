@@ -21,7 +21,7 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
     body { min-height: 100vh; }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px 48px; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 48px; }
     h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
     .sub { color: var(--muted); margin-bottom: 28px; }
     .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
@@ -47,12 +47,14 @@
     .stat b { display: block; font-size: 1.25rem; }
     .stat span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
     #log {
-      height: 340px; overflow: auto; background: #0a0b0e; border: 1px solid var(--line);
+      height: 140px; overflow: auto; background: #0a0b0e; border: 1px solid var(--line);
       border-radius: 10px; padding: 12px; font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap;
+      margin-bottom: 18px;
     }
     .k-info { color: var(--muted); }
     .k-page { color: var(--ink); }
     .k-save { color: var(--save); }
+    .k-found { color: var(--save); }
     .k-scan { color: var(--accent); }
     .k-skip { color: var(--muted); }
     .k-error, .k-err { color: var(--err); }
@@ -67,7 +69,25 @@
     .admin button { background: #2a2430; color: #e8d5ff; }
     .lock { font-size: 12px; color: var(--muted); margin-top: 8px; }
     .lock.on { color: var(--ok); }
-    .locked-ctl { opacity: .55; }
+    .gallery-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .gallery-head h2 { margin: 0; font-size: 1.1rem; }
+    .gallery-head .hint { color: var(--muted); font-size: 13px; }
+    .gallery {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px;
+    }
+    .card {
+      background: var(--panel); border: 2px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer;
+    }
+    .card.sel { border-color: var(--accent); }
+    .card img, .card .ph {
+      width: 100%; height: 148px; object-fit: contain; background: #0a0b0e; display: block;
+    }
+    .card .ph { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+    .card .meta { padding: 8px 10px 10px; font-size: 11px; color: var(--muted); line-height: 1.35; }
+    .card .meta b { color: var(--ink); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card .hid { color: var(--hid); }
+    .empty { color: var(--muted); padding: 28px 8px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+    .saveb { background: #1d3a2a; color: var(--ok); }
     @media (max-width: 700px) {
       .row, .checks, .stats { grid-template-columns: 1fr 1fr; }
       .stats { grid-template-columns: 1fr 1fr; }
@@ -127,17 +147,70 @@
     <div class="stats">
       <div class="stat"><b id="sPages">0</b><span>Pages</span></div>
       <div class="stat"><b id="sFound">0</b><span>Found</span></div>
-      <div class="stat"><b id="sSaved">0</b><span>Saved</span></div>
+      <div class="stat"><b id="sSaved">0</b><span>On disk</span></div>
       <div class="stat"><b id="sHidden">0</b><span>Hidden</span></div>
       <div class="stat"><b id="sErrors">0</b><span>Errors</span></div>
     </div>
     <div id="log"></div>
+    <div class="gallery-head">
+      <div>
+        <h2>Images <span id="gCount">0</span></h2>
+        <div class="hint">Nothing is written to disk until you save. Click a thumbnail to select it.</div>
+      </div>
+      <div class="btns" style="margin-top:0">
+        <button class="saveb" id="saveSel" type="button">Save selected</button>
+        <button class="saveb" id="saveAll" type="button">Save all</button>
+      </div>
+    </div>
+    <div id="gallery" class="gallery"><div class="empty" id="gEmpty">Images will show up here after a grab.</div></div>
   </div>
   <script>
     const logEl = document.getElementById('log');
     const startBtn = document.getElementById('start');
     let found = 0, saved = 0, hidden = 0, pages = 0, errors = 0;
     let unlocked = false;
+    const selected = new Set();
+
+    function clearGallery() {
+      selected.clear();
+      gallery.innerHTML = '';
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.id = 'gEmpty';
+      empty.textContent = 'Images will show up here after a grab.';
+      gallery.appendChild(empty);
+      gCount.textContent = '0';
+    }
+
+    function addCard(img) {
+      const empty = document.getElementById('gEmpty');
+      if (empty) empty.remove();
+      const card = document.createElement('div');
+      card.className = 'card sel';
+      card.dataset.id = String(img.id);
+      selected.add(img.id);
+      const pic = document.createElement('img');
+      pic.alt = img.name || img.url;
+      pic.src = img.preview;
+      pic.loading = 'lazy';
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const title = document.createElement('b');
+      title.textContent = (img.name || '').split('/').pop() || img.url;
+      const via = document.createElement('div');
+      via.textContent = img.via + (img.hidden ? ' · hidden' : '');
+      if (img.hidden) via.className = 'hid';
+      meta.appendChild(title);
+      meta.appendChild(via);
+      card.appendChild(pic);
+      card.appendChild(meta);
+      card.onclick = () => {
+        if (selected.has(img.id)) { selected.delete(img.id); card.classList.remove('sel'); }
+        else { selected.add(img.id); card.classList.add('sel'); }
+      };
+      gallery.appendChild(card);
+      gCount.textContent = String(gallery.querySelectorAll('.card').length);
+    }
 
     function applyLock(on) {
       unlocked = on;
@@ -175,22 +248,24 @@
       const msg = JSON.parse(e.data);
       if (msg.type === 'log') {
         if (msg.kind === 'page') pages++;
-        if (msg.kind === 'save') {
-          saved++;
+        if (msg.kind === 'found') {
+          found++;
           if ((msg.msg || '').includes('[hidden]')) hidden++;
         }
         if (msg.kind === 'error') errors++;
         paintStats();
         line(msg.kind, '[' + msg.at + '] ' + msg.msg);
+      } else if (msg.type === 'image') {
+        addCard(msg);
       } else if (msg.type === 'error') {
         line('error', msg.msg);
         startBtn.disabled = false;
       } else if (msg.type === 'done') {
         startBtn.disabled = false;
         if (msg.ok) {
-          pages = msg.pages; found = msg.found; saved = msg.saved; hidden = msg.hidden; errors = msg.errors;
+          pages = msg.pages; found = msg.found; hidden = msg.hidden; errors = msg.errors;
           paintStats();
-          line('info', 'Finished. Files are in ' + msg.outDir + ' (see _manifest.json for sources).');
+          line('info', 'Finished. Review the images below — nothing was saved to disk yet.');
         }
       }
     };
@@ -214,6 +289,7 @@
       found = saved = hidden = pages = errors = 0;
       paintStats();
       logEl.textContent = '';
+      clearGallery();
       startBtn.disabled = true;
       const body = {
         url: document.getElementById('url').value.trim(),
@@ -249,6 +325,24 @@
       applyLock(true);
       line('info', 'Admin testing limits unlocked.');
     };
+
+    async function saveImages(ids) {
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ outDir: document.getElementById('out').value.trim(), ids })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        line('error', 'Save failed');
+        return;
+      }
+      saved = data.saved || 0;
+      paintStats();
+      line('info', 'Saved ' + saved + ' image(s) to ' + data.outDir);
+    }
+    document.getElementById('saveSel').onclick = () => saveImages([...selected]);
+    document.getElementById('saveAll').onclick = () => saveImages([]);
   </script>
 </body>
 </html>

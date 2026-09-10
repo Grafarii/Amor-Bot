@@ -11,6 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -59,6 +61,8 @@ type guiState struct {
 	running  bool
 	cancel   context.CancelFunc
 	unlocked bool
+	images   map[int]CollectedImage
+	outDir   string
 }
 
 type startReq struct {
@@ -79,7 +83,7 @@ type startReq struct {
 
 func runGUI(web fs.FS) error {
 	hub := newHub()
-	st := &guiState{}
+	st := &guiState{images: map[int]CollectedImage{}}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.FS(web)))
@@ -168,6 +172,8 @@ func runGUI(web fs.FS) error {
 		if unlocked {
 			st.unlocked = true
 		}
+		st.images = map[int]CollectedImage{}
+		st.outDir = req.OutDir
 		ctx, cancel := context.WithCancel(context.Background())
 		st.running = true
 		st.cancel = cancel
@@ -193,6 +199,22 @@ func runGUI(web fs.FS) error {
 			cfg.DelayMs = req.DelayMs
 		}
 		boundMsg := applyBounds(&cfg, unlocked)
+		cfg.Sink = func(img CollectedImage) {
+			st.mu.Lock()
+			st.images[img.ID] = img
+			st.mu.Unlock()
+			hub.send(map[string]any{
+				"type":    "image",
+				"id":      img.ID,
+				"url":     img.URL,
+				"page":    img.Page,
+				"via":     img.Via,
+				"hidden":  img.Hidden,
+				"bytes":   img.Bytes,
+				"name":    img.Name,
+				"preview": img.Preview,
+			})
+		}
 
 		go func() {
 			defer func() {
@@ -231,6 +253,81 @@ func runGUI(web fs.FS) error {
 		}
 		st.mu.Unlock()
 		writeJSON(w, map[string]any{"ok": true})
+	})
+	mux.HandleFunc("/api/image/", func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/api/image/"))
+		if err != nil || id < 1 {
+			http.NotFound(w, r)
+			return
+		}
+		st.mu.Lock()
+		img, ok := st.images[id]
+		st.mu.Unlock()
+		if !ok || len(img.Data) == 0 {
+			http.NotFound(w, r)
+			return
+		}
+		ct := img.ContentType
+		if ct == "" || !strings.HasPrefix(ct, "image/") {
+			ct = "image/png"
+		}
+		w.Header().Set("Content-Type", ct)
+		w.Header().Set("Cache-Control", "private, max-age=60")
+		w.Write(img.Data)
+	})
+	mux.HandleFunc("/api/save", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "POST only", 405)
+			return
+		}
+		var req struct {
+			OutDir string `json:"outDir"`
+			IDs    []int  `json:"ids"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "bad json", 400)
+			return
+		}
+		st.mu.Lock()
+		out := req.OutDir
+		if out == "" {
+			out = st.outDir
+		}
+		if out == "" {
+			out = "grabbed-images"
+		}
+		var picks []CollectedImage
+		if len(req.IDs) == 0 {
+			for _, img := range st.images {
+				picks = append(picks, img)
+			}
+		} else {
+			for _, id := range req.IDs {
+				if img, ok := st.images[id]; ok {
+					picks = append(picks, img)
+				}
+			}
+		}
+		st.mu.Unlock()
+		if err := os.MkdirAll(out, 0o755); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		var man []ManifestEntry
+		n := 0
+		for _, img := range picks {
+			hit := ImageHit{URL: img.URL, Page: img.Page, Via: img.Via, Hidden: img.Hidden}
+			name, err := writeImageFile(out, hit, img.Data, img.ContentType)
+			if err != nil {
+				continue
+			}
+			n++
+			man = append(man, ManifestEntry{File: name, URL: img.URL, Page: img.Page, Via: img.Via, Hidden: img.Hidden, Bytes: img.Bytes})
+		}
+		if data, err := json.MarshalIndent(man, "", "  "); err == nil {
+			_ = os.WriteFile(filepath.Join(out, "_manifest.json"), data, 0o644)
+		}
+		writeJSON(w, map[string]any{"ok": true, "saved": n, "outDir": out})
 	})
 	mux.HandleFunc("/api/quit", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]any{"ok": true})
