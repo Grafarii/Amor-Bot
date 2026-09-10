@@ -167,19 +167,38 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				log("skip", "robots.txt blocked "+j.url)
 				return
 			}
-			key := normalizeVisit(u)
+			key := normalizeVisit(u, cfg.SameHost)
 			mu.Lock()
-			already := visited[key]
-			if !already {
-				visited[key] = true
+			if visited[key] {
+				mu.Unlock()
+				return
 			}
+			visited[key] = true
 			mu.Unlock()
-			if already && j.kind != jobImage {
-				return
+			unmark := func() {
+				mu.Lock()
+				delete(visited, key)
+				mu.Unlock()
 			}
-			if already && j.kind == jobImage {
-				return
+			wg.Add(1)
+			select {
+			case queue <- j:
+			case <-ctx.Done():
+				unmark()
+				wg.Done()
+			default:
+				select {
+				case queue <- j:
+				case <-time.After(2 * time.Second):
+					unmark()
+					wg.Done()
+					log("warn", "queue full, dropped "+j.url)
+				case <-ctx.Done():
+					unmark()
+					wg.Done()
+				}
 			}
+			return
 		}
 		wg.Add(1)
 		select {
@@ -187,7 +206,6 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		case <-ctx.Done():
 			wg.Done()
 		default:
-			// queue full: try blocking briefly
 			select {
 			case queue <- j:
 			case <-time.After(2 * time.Second):
@@ -489,13 +507,18 @@ func canonicalHost(u *url.URL) string {
 	return strings.TrimPrefix(h, "www.")
 }
 
-func normalizeVisit(u *url.URL) string {
+func normalizeVisit(u *url.URL, sameHost bool) string {
 	c := *u
 	c.Fragment = ""
-	c.Host = strings.ToLower(c.Host)
-	if (c.Scheme == "http" && strings.HasSuffix(c.Host, ":80")) || (c.Scheme == "https" && strings.HasSuffix(c.Host, ":443")) {
-		host, _, _ := strings.Cut(c.Host, ":")
+	host := strings.ToLower(c.Hostname())
+	if sameHost {
+		host = strings.TrimPrefix(host, "www.")
+	}
+	port := c.Port()
+	if port == "" || (c.Scheme == "http" && port == "80") || (c.Scheme == "https" && port == "443") {
 		c.Host = host
+	} else {
+		c.Host = host + ":" + port
 	}
 	return c.String()
 }

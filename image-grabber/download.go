@@ -20,11 +20,21 @@ func writeImageFile(outDir string, hit ImageHit, body []byte, contentType string
 	if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
 		return "", err
 	}
-	full = uniquify(full)
-	if err := os.WriteFile(full, body, 0o644); err != nil {
+	f, full, err := createUnique(full)
+	if err != nil {
 		return "", err
 	}
-	rel, err := filepath.Rel(outDir, full)
+	_, err = f.Write(body)
+	if err != nil {
+		f.Close()
+		os.Remove(full)
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		os.Remove(full)
+		return "", err
+	}
+	rel, err = filepath.Rel(outDir, full)
 	if err != nil {
 		rel = filepath.Base(full)
 	}
@@ -176,17 +186,21 @@ func sanitizeSegment(s string) string {
 	return s
 }
 
-func uniquify(full string) string {
-	if _, err := os.Stat(full); err != nil {
-		return full
-	}
+func createUnique(full string) (*os.File, string, error) {
 	ext := filepath.Ext(full)
 	base := strings.TrimSuffix(full, ext)
-	for i := 2; i < 1000; i++ {
-		cand := fmt.Sprintf("%s_%d%s", base, i, ext)
-		if _, err := os.Stat(cand); err != nil {
-			return cand
+	for i := 1; i < 1000; i++ {
+		cand := full
+		if i > 1 {
+			cand = fmt.Sprintf("%s_%d%s", base, i, ext)
+		}
+		f, err := os.OpenFile(cand, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+		if err == nil {
+			return f, cand, nil
+		}
+		if !os.IsExist(err) {
+			return nil, "", err
 		}
 	}
-	return fmt.Sprintf("%s_%d%s", base, 1000, ext)
+	return nil, "", fmt.Errorf("too many name collisions for %s", filepath.Base(full))
 }
