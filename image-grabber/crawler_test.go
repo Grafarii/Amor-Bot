@@ -240,3 +240,72 @@ func TestForbiddenIsSkippedNotError(t *testing.T) {
 		t.Fatalf("missing users avatar. got %s", joined)
 	}
 }
+
+func TestCrawlCollectsMp4AndOddImageExt(t *testing.T) {
+	mp4 := []byte{0x00, 0x00, 0x00, 0x18, 'f', 't', 'y', 'p', 'i', 's', 'o', 'm', 0x00, 0x00, 0x02, 0x00, 'i', 's', 'o', 'm'}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body>
+<video src="/clip.mp4" poster="/poster.jpg"><source src="/alt.webm"></video>
+<a href="/scan.tiff">tiff</a>
+<img src="/pic.bmp">
+</body></html>`))
+	})
+	mux.HandleFunc("/clip.mp4", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "video/mp4")
+		w.Write(mp4)
+	})
+	mux.HandleFunc("/alt.webm", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Write(mp4)
+	})
+	mux.HandleFunc("/poster.jpg", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/jpeg")
+		w.Write([]byte{0xff, 0xd8, 0xff, 0xd9})
+	})
+	mux.HandleFunc("/scan.tiff", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/tiff")
+		w.Write([]byte("II*\x00not-a-real-tiff-but-typed"))
+	})
+	mux.HandleFunc("/pic.bmp", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/bmp")
+		w.Write([]byte("BM" + strings.Repeat("x", 20)))
+	})
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(string, string) {}); err != nil {
+		t.Fatal(err)
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	for _, needle := range []string{"clip.mp4", "alt.webm", "poster.jpg", "scan.tiff", "pic.bmp"} {
+		if !strings.Contains(joined, needle) {
+			t.Errorf("missing %s in %s", needle, joined)
+		}
+	}
+}

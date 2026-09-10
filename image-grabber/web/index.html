@@ -80,7 +80,7 @@
       background: var(--panel); border: 2px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer;
     }
     .card.sel { border-color: var(--accent); }
-    .card img, .card .ph {
+    .card img, .card video, .card .ph {
       width: 100%; height: 148px; object-fit: contain; background: #0a0b0e; display: block;
     }
     .card .ph { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
@@ -98,7 +98,7 @@
 <body>
   <div class="wrap">
     <h1>Site Image Grabber</h1>
-    <p class="sub">Crawls a site or directory index and downloads every image it can find — including ones hidden in comments, CSS, scripts, sitemaps, lazy-load attributes, and off-screen markup.</p>
+    <p class="sub">Crawls a site or directory index and downloads every image and video it can find — including hidden ones, every image extension, and MP4s.</p>
 
     <div class="panel">
       <label for="url">Site or index URL</label>
@@ -134,7 +134,7 @@
         <button class="stop" id="stop" type="button">Stop</button>
         <button class="quit" id="quit" type="button">Quit app</button>
       </div>
-      <p class="note">Only use this on sites you own or have permission to copy. Hidden images include <code>display:none</code>, <code>&lt;!-- comments --&gt;</code>, <code>data-src</code> lazy loads, and URLs buried in CSS/JS.</p>
+      <p class="note">Only use this on sites you own or have permission to copy. Hidden images include <code>display:none</code>, <code>&lt;!-- comments --&gt;</code>, <code>data-src</code> lazy loads, and URLs buried in CSS/JS. Videos (<code>.mp4</code>, WebM, MOV, …) are collected too.</p>
       <div class="admin">
         <div>
           <label for="adminPass">Admin password (testing)</label>
@@ -213,16 +213,25 @@
       card.className = 'card sel';
       card.dataset.id = String(img.id);
       selected.add(img.id);
-      const pic = document.createElement('img');
+      const video = /^(video\/)/i.test(img.contentType || '') ||
+        /\.(mp4|m4v|mov|webm|ogv|avi|mkv|3gp|mpeg|mpg|flv|wmv)(\?|$)/i.test(img.url || img.name || '');
+      const pic = document.createElement(video ? 'video' : 'img');
       pic.alt = img.name || img.url;
       pic.src = img.preview;
-      pic.loading = 'lazy';
+      if (video) {
+        pic.muted = true;
+        pic.playsInline = true;
+        pic.preload = 'metadata';
+        pic.controls = true;
+      } else {
+        pic.loading = 'lazy';
+      }
       const meta = document.createElement('div');
       meta.className = 'meta';
       const title = document.createElement('b');
       title.textContent = (img.name || '').split('/').pop() || img.url;
       const via = document.createElement('div');
-      via.textContent = img.via + (img.hidden ? ' · hidden' : '');
+      via.textContent = (video ? 'video · ' : '') + img.via + (img.hidden ? ' · hidden' : '');
       if (img.hidden) via.className = 'hid';
       meta.appendChild(title);
       meta.appendChild(via);

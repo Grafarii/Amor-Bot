@@ -24,6 +24,7 @@ var mediaFolders = []string{
 	"images", "img", "image", "photos", "photo", "pics", "pictures",
 	"media", "uploads", "upload", "files", "gallery", "galleries",
 	"albums", "thumbs", "thumbnails", "static", "assets", "content",
+	"videos", "video", "clips", "movies", "mp4", "footage",
 }
 
 var extraAdminFolders = []string{
@@ -38,9 +39,13 @@ func applyBrowserHeaders(req *http.Request, referer, dest string) {
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
 	switch dest {
-	case "image":
-		req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/*,*/*;q=0.8")
-		req.Header.Set("Sec-Fetch-Dest", "image")
+	case "image", "media":
+		req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/*,video/webm,video/mp4,video/*,*/*;q=0.8")
+		if dest == "media" {
+			req.Header.Set("Sec-Fetch-Dest", "empty")
+		} else {
+			req.Header.Set("Sec-Fetch-Dest", "image")
+		}
 		req.Header.Set("Sec-Fetch-Mode", "no-cors")
 		req.Header.Set("Sec-Fetch-Site", "same-origin")
 	default:

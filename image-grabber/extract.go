@@ -11,11 +11,7 @@ import (
 )
 
 var (
-	reImageExt    = regexp.MustCompile(`(?i)\.(jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?|#|$)`)
 	reCSSURL      = regexp.MustCompile(`(?i)url\(\s*['"]?([^'")]+)['"]?\s*\)`)
-	reQuotedImg   = regexp.MustCompile(`(?i)['"]([^'"]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^'"]*)?)['"]`)
-	reBareImg     = regexp.MustCompile(`(?i)(?:https?:)?//[^\s"'<>\\]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?|/[^\s"'<>\\]*\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?`)
-	reDataURI     = regexp.MustCompile(`(?i)data:image/([a-z0-9.+-]+);base64,([A-Za-z0-9+/=\s]+)`)
 	reXMLLoc      = regexp.MustCompile(`(?is)<(?:image:)?loc>\s*([^<]+?)\s*</(?:image:)?loc>`)
 	reMediaURL    = regexp.MustCompile(`(?i)(?:url|href|src|content)=["']([^"']+)["']`)
 	reHiddenClass = regexp.MustCompile(`(?i)(?:^|\s)(?:hidden|hide|invisible|sr-only|visually-hidden|d-none|is-hidden|u-hidden|display-none|visuallyhidden)(?:\s|$)`)
@@ -127,6 +123,7 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 				}
 			case "source":
 				addImg(attrs["src"], "source-src", hidden)
+				addImg(attrs["data-src"], "source-data-src", hidden)
 				for _, u := range parseSrcset(attrs["srcset"]) {
 					addImg(u, "source-srcset", hidden)
 				}
@@ -138,6 +135,9 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 				addImg(attrs["xlink:href"], "svg-xlink", hidden)
 				addImg(attrs["src"], "svg-src", hidden)
 			case "video":
+				addImg(attrs["src"], "video-src", hidden)
+				addImg(attrs["data-src"], "video-data-src", hidden)
+				addImg(attrs["data-video-src"], "data-video-src", hidden)
 				addImg(attrs["poster"], "video-poster", hidden)
 			case "input":
 				if strings.EqualFold(attrs["type"], "image") {
@@ -161,8 +161,8 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 				switch {
 				case strings.Contains(rel, "icon") || rel == "apple-touch-icon" || rel == "mask-icon" || rel == "image_src" || rel == "shortcut icon":
 					addImg(href, "link-icon", hidden)
-				case as == "image" || strings.HasPrefix(typ, "image/"):
-					addImg(href, "link-preload-image", hidden)
+				case as == "image" || as == "video" || strings.HasPrefix(typ, "image/") || strings.HasPrefix(typ, "video/"):
+					addImg(href, "link-preload-media", hidden)
 				case strings.Contains(rel, "stylesheet") || typ == "text/css":
 					out.Styles = append(out.Styles, ResourceHit{URL: resolve(page, href), Via: "stylesheet"})
 				case strings.Contains(rel, "manifest"):
@@ -274,7 +274,9 @@ func extractFromText(page *url.URL, text, via string, hidden bool, out *ExtractR
 		addImage(out, seen, page, u, via+"-css-url", hidden)
 	}
 	for _, m := range reDataURI.FindAllStringSubmatch(unescaped, -1) {
-		addDataURI(out, seen, page, m[0], m[1], via+"-data-uri", hidden)
+		if len(m) == 4 {
+			addDataURI(out, seen, page, m[0], m[2], via+"-data-uri", hidden)
+		}
 	}
 }
 
@@ -334,10 +336,10 @@ func addImage(out *ExtractResult, seen map[string]bool, page *url.URL, raw, via 
 	if raw == "" || raw == "#" {
 		return
 	}
-	if strings.HasPrefix(strings.ToLower(raw), "data:image/") {
+	if strings.HasPrefix(strings.ToLower(raw), "data:image/") || strings.HasPrefix(strings.ToLower(raw), "data:video/") {
 		m := reDataURI.FindStringSubmatch(raw)
-		if len(m) == 3 {
-			addDataURI(out, seen, page, m[0], m[1], via, hidden)
+		if len(m) == 4 {
+			addDataURI(out, seen, page, m[0], m[2], via, hidden)
 		}
 		return
 	}
@@ -434,21 +436,6 @@ func cssURLs(v string) []string {
 	return out
 }
 
-func looksLikeImage(raw string) bool {
-	s := strings.TrimSpace(strings.ToLower(raw))
-	if s == "" {
-		return false
-	}
-	if strings.HasPrefix(s, "data:image/") {
-		return true
-	}
-	u, err := url.Parse(s)
-	if err != nil {
-		return reImageExt.MatchString(s)
-	}
-	return reImageExt.MatchString(u.Path)
-}
-
 func resolve(base *url.URL, ref string) string {
 	ref = strings.TrimSpace(ref)
 	if ref == "" || base == nil {
@@ -464,36 +451,6 @@ func resolve(base *url.URL, ref string) string {
 	abs := base.ResolveReference(u)
 	abs.Fragment = ""
 	return abs.String()
-}
-
-func mimeToExt(mime string) string {
-	switch strings.ToLower(strings.TrimSpace(mime)) {
-	case "jpeg", "jpg":
-		return ".jpg"
-	case "png":
-		return ".png"
-	case "gif":
-		return ".gif"
-	case "webp":
-		return ".webp"
-	case "svg+xml", "svg":
-		return ".svg"
-	case "bmp":
-		return ".bmp"
-	case "x-icon", "vnd.microsoft.icon", "icon":
-		return ".ico"
-	case "avif":
-		return ".avif"
-	case "tiff":
-		return ".tiff"
-	case "apng":
-		return ".apng"
-	default:
-		if strings.Contains(mime, "svg") {
-			return ".svg"
-		}
-		return ".img"
-	}
 }
 
 func isPagePath(u *url.URL) bool {

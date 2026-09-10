@@ -209,15 +209,16 @@ func runGUI(web fs.FS) error {
 			st.images[img.ID] = img
 			st.mu.Unlock()
 			hub.send(map[string]any{
-				"type":    "image",
-				"id":      img.ID,
-				"url":     img.URL,
-				"page":    img.Page,
-				"via":     img.Via,
-				"hidden":  img.Hidden,
-				"bytes":   img.Bytes,
-				"name":    img.Name,
-				"preview": img.Preview,
+				"type":        "image",
+				"id":          img.ID,
+				"url":         img.URL,
+				"page":        img.Page,
+				"via":         img.Via,
+				"hidden":      img.Hidden,
+				"bytes":       img.Bytes,
+				"name":        img.Name,
+				"preview":     img.Preview,
+				"contentType": img.ContentType,
 			})
 		}
 
@@ -275,10 +276,7 @@ func runGUI(web fs.FS) error {
 			http.NotFound(w, r)
 			return
 		}
-		ct := img.ContentType
-		if ct == "" || !strings.HasPrefix(ct, "image/") {
-			ct = "image/png"
-		}
+		ct := previewContentType(img.ContentType, img.Name, img.URL)
 		w.Header().Set("Content-Type", ct)
 		w.Header().Set("Cache-Control", "private, max-age=60")
 		w.Write(img.Data)

@@ -124,6 +124,26 @@ func extFrom(hit ImageHit, body []byte, contentType string) string {
 		return ".bmp"
 	case strings.Contains(ct, "icon"):
 		return ".ico"
+	case strings.Contains(ct, "tiff"):
+		return ".tiff"
+	case strings.Contains(ct, "heic"), strings.Contains(ct, "heif"):
+		return ".heic"
+	case strings.Contains(ct, "jxl"):
+		return ".jxl"
+	case strings.Contains(ct, "mp4"):
+		return ".mp4"
+	case strings.Contains(ct, "webm"):
+		return ".webm"
+	case strings.Contains(ct, "quicktime"):
+		return ".mov"
+	case strings.Contains(ct, "ogg") && strings.Contains(ct, "video"):
+		return ".ogv"
+	case strings.Contains(ct, "msvideo") || strings.Contains(ct, "avi"):
+		return ".avi"
+	case strings.Contains(ct, "matroska"):
+		return ".mkv"
+	case strings.HasPrefix(ct, "video/"):
+		return ".mp4"
 	}
 	if looksLikeImage(hit.URL) {
 		u, err := url.Parse(hit.URL)
@@ -133,6 +153,9 @@ func extFrom(hit ImageHit, body []byte, contentType string) string {
 				return ext
 			}
 		}
+	}
+	if len(body) >= 12 && string(body[4:8]) == "ftyp" {
+		return ".mp4"
 	}
 	if len(body) >= 8 && string(body[:8]) == "\x89PNG\r\n\x1a\n" {
 		return ".png"

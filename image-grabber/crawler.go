@@ -119,7 +119,7 @@ func defaultConfig() Config {
 		RespectRobots: true,
 		Concurrency:   6,
 		DelayMs:       80,
-		MaxBytes:      40 << 20,
+		MaxBytes:      80 << 20,
 	}
 }
 
@@ -153,7 +153,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		cfg.MaxPages = 200
 	}
 	if cfg.MaxBytes < 1 {
-		cfg.MaxBytes = 40 << 20
+		cfg.MaxBytes = 80 << 20
 	}
 
 	client := newCrawlClient()
@@ -349,7 +349,11 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				return
 			}
 			img.URL = "data-uri-" + shortHash(decoded)
-			saveBytes(img, decoded, "image/"+strings.TrimPrefix(img.Ext, "."))
+			ct := "image/" + strings.TrimPrefix(img.Ext, ".")
+			if isVideoName(img.Ext, "", "") {
+				ct = "video/" + strings.TrimPrefix(img.Ext, ".")
+			}
+			saveBytes(img, decoded, ct)
 			return
 		}
 		enqueue(job{kind: jobImage, url: img.URL, depth: depth, via: img.Via, hidden: img.Hidden, page: img.Page})
@@ -357,7 +361,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 
 	process := func(j job) {
 		if j.kind == jobImage {
-			body, ct, final, err := fetch(j.url, j.page, "image")
+			body, ct, final, err := fetch(j.url, j.page, "media")
 			if err != nil {
 				if isSoftMiss(err, j.via) {
 					stats.Skipped.Add(1)
@@ -368,9 +372,9 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				log("error", "download "+j.url+": "+err.Error())
 				return
 			}
-			if !isImageContent(ct, body) && !looksLikeImage(j.url) {
+			if !isMediaContent(ct, body) && !looksLikeImage(j.url) {
 				stats.Skipped.Add(1)
-				log("skip", "not an image: "+j.url)
+				log("skip", "not media: "+j.url)
 				return
 			}
 			hit := ImageHit{URL: j.url, Page: j.page, Via: j.via, Hidden: j.hidden}
@@ -407,7 +411,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if pageURL == nil {
 			pageURL, _ = url.Parse(j.url)
 		}
-		if isImageContent(ct, body) {
+		if isMediaContent(ct, body) {
 			stats.Found.Add(1)
 			saveBytes(ImageHit{URL: pageURL.String(), Page: j.page, Via: j.via, Hidden: j.hidden}, body, ct)
 			return
@@ -620,28 +624,4 @@ func normalizeVisit(u *url.URL, sameHost bool) string {
 func shortHash(b []byte) string {
 	s := sha1.Sum(b)
 	return hex.EncodeToString(s[:8])
-}
-
-func isImageContent(ct string, body []byte) bool {
-	ct = strings.ToLower(ct)
-	if strings.HasPrefix(ct, "image/") {
-		return true
-	}
-	if len(body) >= 8 && string(body[:8]) == "\x89PNG\r\n\x1a\n" {
-		return true
-	}
-	if len(body) >= 3 && body[0] == 0xff && body[1] == 0xd8 && body[2] == 0xff {
-		return true
-	}
-	if len(body) >= 6 && (string(body[:6]) == "GIF87a" || string(body[:6]) == "GIF89a") {
-		return true
-	}
-	if len(body) >= 12 && string(body[:4]) == "RIFF" && string(body[8:12]) == "WEBP" {
-		return true
-	}
-	if len(body) >= 2 && string(body[:2]) == "BM" {
-		return true
-	}
-	trim := strings.TrimSpace(string(body[:min(256, len(body))]))
-	return strings.HasPrefix(trim, "<svg") || (strings.HasPrefix(trim, "<?xml") && strings.Contains(strings.ToLower(trim), "svg"))
 }

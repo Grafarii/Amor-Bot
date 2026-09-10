@@ -16,7 +16,7 @@ const (
 	adminMaxDepth = 50
 	adminMaxPages = 50000
 	adminMaxConc  = 16
-	adminMaxBytes = 200 << 20
+	adminMaxBytes = 1 << 30
 )
 
 func configuredAdminPassword() string {
@@ -48,7 +48,7 @@ func applyBounds(cfg *Config, unlocked bool) string {
 		if cfg.Concurrency > adminMaxConc {
 			cfg.Concurrency = adminMaxConc
 		}
-		if cfg.MaxBytes > adminMaxBytes {
+		if cfg.MaxBytes < adminMaxBytes {
 			cfg.MaxBytes = adminMaxBytes
 		}
 		cfg.DeepScan = true

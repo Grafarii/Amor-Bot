@@ -1,10 +1,12 @@
 # Site Image Grabber
 
-Windows app that crawls a website (or a directory index) and downloads **every image it can find** — including ones that are not shown on the page.
+Windows app that crawls a website (or a directory index) and downloads **every image and video it can find** — including ones that are not shown on the page, every image extension, and MP4s.
 
 ## What it collects
 
 - `<img src>`, `srcset`, `<picture>` / `<source>`
+- `<video src>`, `<source type="video/mp4">`, posters, and direct `.mp4` / `.webm` / `.mov` links
+- Every common image extension (JPEG, PNG, GIF, WebP, SVG, BMP, ICO, AVIF, TIFF, HEIC, JPEG XL, PSD, RAW, …)
 - Lazy-load attributes (`data-src`, `data-original`, `data-bg`, …)
 - CSS `url()` backgrounds (inline and linked stylesheets)
 - URLs buried in JavaScript and JSON
