@@ -1,0 +1,116 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+)
+
+// 1x1 transparent PNG
+var pngDot = []byte{
+	0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+	0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+	0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+	0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89,
+	0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41, 0x54,
+	0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01,
+	0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00,
+	0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+}
+
+func TestCrawlHiddenIndexAndAssets(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("User-agent: *\nAllow: /\nSitemap: http://" + r.Host + "/sitemap.xml\n"))
+	})
+	mux.HandleFunc("/sitemap.xml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write([]byte(`<?xml version="1.0"?><urlset><url><loc>http://` + r.Host + `/</loc><image:loc>http://` + r.Host + `/from-sitemap.png</image:loc></url></urlset>`))
+	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<!doctype html>
+<html><head>
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js"></script>
+</head><body>
+<img src="/visible.png">
+<!-- <img src="/commented.png"> -->
+<div hidden><img src="/hidden.png"></div>
+<a href="/index/">photos</a>
+</body></html>`))
+	})
+	mux.HandleFunc("/app.css", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css")
+		w.Write([]byte(`body{background:url(/css.png)}`))
+	})
+	mux.HandleFunc("/app.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write([]byte(`var x = "/js.png";`))
+	})
+	mux.HandleFunc("/index/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><h1>Index of /index/</h1><a href="/listed.png">listed.png</a></body></html>`))
+	})
+	servePNG := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	}
+	for _, p := range []string{"/visible.png", "/commented.png", "/hidden.png", "/css.png", "/js.png", "/listed.png", "/from-sitemap.png"} {
+		mux.HandleFunc(p, servePNG)
+	}
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	out := t.TempDir()
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.OutDir = out
+	cfg.MaxDepth = 2
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.Concurrency = 4
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	stats, err := Run(ctx, cfg, func(string, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Saved.Load() < 7 {
+		t.Fatalf("expected at least 7 saved images, got %d (found=%d errors=%d)", stats.Saved.Load(), stats.Found.Load(), stats.Errors.Load())
+	}
+	if stats.Hidden.Load() < 2 {
+		t.Fatalf("expected hidden images, got %d", stats.Hidden.Load())
+	}
+
+	raw, err := os.ReadFile(filepath.Join(out, "_manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var man []ManifestEntry
+	if err := json.Unmarshal(raw, &man); err != nil {
+		t.Fatal(err)
+	}
+	joined := ""
+	for _, e := range man {
+		joined += e.URL + " " + e.Via + "\n"
+	}
+	for _, needle := range []string{"visible.png", "commented.png", "hidden.png", "css.png", "js.png", "listed.png", "from-sitemap.png"} {
+		if !strings.Contains(joined, needle) {
+			t.Errorf("manifest missing %s\n%s", needle, joined)
+		}
+	}
+}
