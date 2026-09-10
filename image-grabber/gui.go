@@ -351,10 +351,10 @@ func runGUI(web fs.FS) error {
 		}
 	}
 	url := "http://" + ln.Addr().String() + "/"
-	fmt.Println("Site Image Grabber")
+	fmt.Println("Lumina")
+	fmt.Println("Collect every image this site publishes.")
 	fmt.Println("Open this page if the browser does not appear:")
 	fmt.Println("  " + url)
-	fmt.Println("Testing limits are locked. Unlock in the UI with the admin password.")
 	fmt.Println("Close this window or press Ctrl+C to quit.")
 	openBrowser(url)
 	return http.Serve(ln, mux)

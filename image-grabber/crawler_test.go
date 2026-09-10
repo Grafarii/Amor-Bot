@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -381,6 +382,125 @@ func TestCrawlSniffsIndexNotGuessedFolders(t *testing.T) {
 		if !strings.Contains(joined, needle) {
 			t.Errorf("index sniff missed %s in %s", needle, joined)
 		}
+	}
+}
+
+func TestCanonicalHost(t *testing.T) {
+	must := func(raw string) *url.URL {
+		u, err := url.Parse(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return u
+	}
+	if got, want := canonicalHost(must("https://www.Example.com/a")), "example.com"; got != want {
+		t.Fatalf("www host: got %q want %q", got, want)
+	}
+	if got, want := canonicalHost(must("http://127.0.0.1:8000/")), "127.0.0.1:8000"; got != want {
+		t.Fatalf("localhost port: got %q want %q", got, want)
+	}
+	a := canonicalHost(must("http://127.0.0.1:8000/"))
+	b := canonicalHost(must("http://127.0.0.1:8001/leave.html"))
+	if a == b {
+		t.Fatal("different ports on localhost must be different sites")
+	}
+}
+
+func TestJobHostBound(t *testing.T) {
+	if (job{kind: jobPage}).hostBound() != true {
+		t.Fatal("pages should stay on the start site")
+	}
+	if (job{kind: jobSitemap}).hostBound() != true {
+		t.Fatal("sitemaps should stay on the start site")
+	}
+	for _, k := range []jobKind{jobImage, jobStyle, jobScript, jobManifest} {
+		if (job{kind: k}).hostBound() {
+			t.Fatalf("kind %d should collect CDN files this site publishes", k)
+		}
+	}
+	if (job{kind: jobPage, url: "https://cdn.example/hero.png"}).hostBound() {
+		t.Fatal("a media URL should not be host-bound even as a page job")
+	}
+}
+
+func TestCollectsCDNImagesWithoutCrawlingOffsitePages(t *testing.T) {
+	var otherHits atomic.Int64
+	cdn := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/hero.png", "/cdn-bg.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(pngDot)
+		case "/theme.css":
+			w.Header().Set("Content-Type", "text/css")
+			w.Write([]byte(`body{background:url(/cdn-bg.png)}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer cdn.Close()
+
+	other := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		otherHits.Add(1)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><img src="/secret.png"></body></html>`))
+	}))
+	defer other.Close()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprintf(w, `<html><head><link rel="stylesheet" href="%s/theme.css"></head><body>
+<img src="%s/hero.png">
+<img src="/local.png">
+<a href="%s/leave.html">leave this site</a>
+</body></html>`, cdn.URL, cdn.URL, other.URL)
+	})
+	mux.HandleFunc("/local.png", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	})
+	origin := httptest.NewServer(mux)
+	defer origin.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = origin.URL + "/"
+	cfg.SameHost = true
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.MaxDepth = 2
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(string, string) {}); err != nil {
+		t.Fatal(err)
+	}
+	if otherHits.Load() != 0 {
+		t.Fatalf("crawled off-site HTML (%d hits); pages must stay on this site", otherHits.Load())
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	for _, needle := range []string{"hero.png", "cdn-bg.png", "local.png"} {
+		if !strings.Contains(joined, needle) {
+			t.Errorf("missing %s in %s", needle, joined)
+		}
+	}
+	if strings.Contains(joined, "secret.png") {
+		t.Fatalf("collected an image from an off-site page: %s", joined)
 	}
 }
 

@@ -17,11 +17,11 @@ var webRoot embed.FS
 func main() {
 	cfg := defaultConfig()
 	gui := flag.Bool("gui", false, "open the desktop UI (default if no URL is given)")
-	flag.StringVar(&cfg.StartURL, "url", "", "site or directory-index URL to crawl")
-	flag.StringVar(&cfg.OutDir, "out", "", "folder to save images into")
-	flag.IntVar(&cfg.MaxDepth, "depth", cfg.MaxDepth, "how many link hops to follow")
-	flag.IntVar(&cfg.MaxPages, "max-pages", cfg.MaxPages, "maximum HTML pages to visit")
-	flag.BoolVar(&cfg.SameHost, "same-host", cfg.SameHost, "stay on the same hostname")
+	flag.StringVar(&cfg.StartURL, "url", "", "the site to collect from")
+	flag.StringVar(&cfg.OutDir, "out", "", "folder to save the collection into")
+	flag.IntVar(&cfg.MaxDepth, "depth", cfg.MaxDepth, "how many link hops to follow on this site")
+	flag.IntVar(&cfg.MaxPages, "max-pages", cfg.MaxPages, "maximum HTML pages to visit on this site")
+	flag.BoolVar(&cfg.SameHost, "same-host", cfg.SameHost, "stay on this site's pages (CDN images the site uses are still collected)")
 	flag.BoolVar(&cfg.ParseSitemap, "sitemap", cfg.ParseSitemap, "read sitemap.xml and robots.txt sitemaps")
 	flag.BoolVar(&cfg.ParseCSS, "css", cfg.ParseCSS, "scan stylesheets for url() images")
 	flag.BoolVar(&cfg.ParseJS, "js", cfg.ParseJS, "scan scripts for image URLs")
@@ -72,6 +72,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("\nSaved %d images (%d hidden) from %d pages → %s\n",
+	fmt.Printf("\nCollected %d images (%d hidden) from %d pages of this site → %s\n",
 		stats.Saved.Load(), stats.Hidden.Load(), stats.Pages.Load(), cfg.OutDir)
 }

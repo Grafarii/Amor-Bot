@@ -55,7 +55,7 @@ func applyBounds(cfg *Config, unlocked bool) string {
 		if cfg.Concurrency < 10 {
 			cfg.Concurrency = 10
 		}
-		return "admin testing mode — sniff the page index, no queue-full drops"
+		return "studio unlocked — walk more of this site, take every image it publishes, no queue-full drops"
 	}
 	cfg.SameHost = true
 	cfg.RespectRobots = true
@@ -68,5 +68,5 @@ func applyBounds(cfg *Config, unlocked bool) string {
 	if cfg.DelayMs < safeMinDelay {
 		cfg.DelayMs = safeMinDelay
 	}
-	return "safe mode — same site, robots.txt, depth 4, 500 pages"
+	return "this site — pages stay here; every image the site publishes is collected"
 }

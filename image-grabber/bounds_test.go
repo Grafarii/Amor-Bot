@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -19,8 +20,8 @@ func TestApplyBoundsLocksWithoutAdmin(t *testing.T) {
 	if cfg.MaxDepth != safeMaxDepth || cfg.MaxPages != safeMaxPages || cfg.DelayMs != safeMinDelay {
 		t.Fatalf("safe caps not applied: %+v", cfg)
 	}
-	if msg == "" {
-		t.Fatal("expected status message")
+	if !strings.Contains(msg, "this site") {
+		t.Fatalf("safe mode should talk about this site, got %q", msg)
 	}
 }
 
@@ -31,7 +32,7 @@ func TestApplyBoundsUnlocksWithAdmin(t *testing.T) {
 	cfg.MaxDepth = 12
 	cfg.MaxPages = 2000
 	cfg.DelayMs = 0
-	applyBounds(&cfg, true)
+	msg := applyBounds(&cfg, true)
 	if cfg.SameHost || cfg.RespectRobots || cfg.DelayMs != 0 {
 		t.Fatalf("admin mode should keep testing choices: %+v", cfg)
 	}
@@ -40,6 +41,9 @@ func TestApplyBoundsUnlocksWithAdmin(t *testing.T) {
 	}
 	if !cfg.DeepScan {
 		t.Fatal("admin mode should enable deep scan")
+	}
+	if !strings.Contains(msg, "this site") {
+		t.Fatalf("studio mode should still be about this site, got %q", msg)
 	}
 }
 

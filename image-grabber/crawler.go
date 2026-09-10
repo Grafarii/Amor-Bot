@@ -106,6 +106,20 @@ type job struct {
 	ext    string
 }
 
+// hostBound is true when this job should stay on the start site.
+// Image, stylesheet, script, and manifest fetches are never host-bound, so
+// CDN files this site publishes are still collected.
+func (j job) hostBound() bool {
+	switch j.kind {
+	case jobImage, jobStyle, jobScript, jobManifest:
+		return false
+	}
+	if looksLikeImage(j.url) {
+		return false
+	}
+	return true
+}
+
 func defaultConfig() Config {
 	return Config{
 		MaxDepth:      5,
@@ -187,10 +201,10 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		}
 		var unmark func()
 		if u != nil {
-			if cfg.SameHost && u.Scheme != "data" && canonicalHost(u) != originHost {
+			if cfg.SameHost && j.hostBound() && u.Scheme != "data" && canonicalHost(u) != originHost {
 				return
 			}
-			if cfg.RespectRobots && u.Scheme != "data" && !robots.allowed(u) {
+			if cfg.RespectRobots && j.hostBound() && u.Scheme != "data" && !robots.allowed(u) {
 				stats.Skipped.Add(1)
 				log("skip", "robots.txt blocked "+j.url)
 				return
@@ -545,7 +559,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		log("info", "using session cookies")
 	}
 	doLogin(ctx, client, cfg, log)
-	log("info", "starting at "+start.String()+" — sniffing the page index")
+	log("info", "starting at "+start.String()+" — scraping images from the page and its directories")
 	enqueue(job{kind: jobPage, url: start.String(), depth: 0, via: "start", page: start.String()})
 	if dir := listingURLFromStart(start); dir != "" && dir != start.String() {
 		enqueue(job{kind: jobPage, url: dir, depth: 0, via: "page-index", page: start.String()})
@@ -585,7 +599,12 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 
 func canonicalHost(u *url.URL) string {
 	h := strings.ToLower(u.Hostname())
-	return strings.TrimPrefix(h, "www.")
+	h = strings.TrimPrefix(h, "www.")
+	port := u.Port()
+	if port == "" || (u.Scheme == "http" && port == "80") || (u.Scheme == "https" && port == "443") {
+		return h
+	}
+	return h + ":" + port
 }
 
 func normalizeVisit(u *url.URL, sameHost bool) string {
