@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -180,7 +182,7 @@ func TestForbiddenIsSkippedNotError(t *testing.T) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`<html><body><img src="/ok.png"><img src="/denied.png"></body></html>`))
+		w.Write([]byte(`<html><body><img src="/ok.png"><img src="/denied.png"><a href="/users/">users</a></body></html>`))
 	})
 	mux.HandleFunc("/ok.png", func(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(r.Header.Get("User-Agent"), "Chrome") {
@@ -307,5 +309,89 @@ func TestCrawlCollectsMp4AndOddImageExt(t *testing.T) {
 		if !strings.Contains(joined, needle) {
 			t.Errorf("missing %s in %s", needle, joined)
 		}
+	}
+}
+
+func TestCrawlSniffsIndexNotGuessedFolders(t *testing.T) {
+	var hitUsers, hitMedia atomic.Bool
+	mux := http.NewServeMux()
+	mux.HandleFunc("/photos/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/photos/" && r.URL.Path != "/photos" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><h1>Index of /photos/</h1>
+<a href="shot.png">shot.png</a>
+<a href="album/">album/</a>
+<pre>also-plain.jpg  12-Jan-2024</pre>
+</body></html>`))
+	})
+	mux.HandleFunc("/photos/album/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><h1>Index of /photos/album/</h1><a href="nested.png">nested.png</a></body></html>`))
+	})
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		hitUsers.Store(true)
+		w.WriteHeader(http.StatusNotFound)
+	})
+	mux.HandleFunc("/media/", func(w http.ResponseWriter, r *http.Request) {
+		hitMedia.Store(true)
+		w.WriteHeader(http.StatusNotFound)
+	})
+	servePNG := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	}
+	mux.HandleFunc("/photos/shot.png", servePNG)
+	mux.HandleFunc("/photos/also-plain.jpg", servePNG)
+	mux.HandleFunc("/photos/album/nested.png", servePNG)
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/photos/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.MaxDepth = 2
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(string, string) {}); err != nil {
+		t.Fatal(err)
+	}
+	if hitUsers.Load() || hitMedia.Load() {
+		t.Fatalf("guessed /users/ or /media/ instead of sniffing the index (users=%v media=%v)", hitUsers.Load(), hitMedia.Load())
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	for _, needle := range []string{"shot.png", "also-plain.jpg", "nested.png"} {
+		if !strings.Contains(joined, needle) {
+			t.Errorf("index sniff missed %s in %s", needle, joined)
+		}
+	}
+}
+
+func TestListingURLFromStart(t *testing.T) {
+	u, _ := url.Parse("https://example.com/gallery/index.html")
+	got := listingURLFromStart(u)
+	if got != "https://example.com/gallery/" {
+		t.Fatalf("got %q", got)
+	}
+	u, _ = url.Parse("https://example.com/photos/")
+	if listingURLFromStart(u) != "" {
+		t.Fatal("directory URL should not invent another listing")
 	}
 }

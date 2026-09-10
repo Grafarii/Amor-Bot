@@ -39,7 +39,7 @@ func TestApplyBoundsUnlocksWithAdmin(t *testing.T) {
 		t.Fatalf("admin mode should keep requested limits: %+v", cfg)
 	}
 	if !cfg.DeepScan {
-		t.Fatal("admin mode should enable deep folder/user scan")
+		t.Fatal("admin mode should enable deep scan")
 	}
 }
 

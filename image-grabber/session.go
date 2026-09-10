@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 )
@@ -14,24 +15,6 @@ import (
 const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 var errForbidden = errors.New("HTTP 403")
-
-var userFolders = []string{
-	"users", "user", "members", "member", "profiles", "profile",
-	"people", "avatars", "avatar", "accounts", "u",
-}
-
-var mediaFolders = []string{
-	"images", "img", "image", "photos", "photo", "pics", "pictures",
-	"media", "uploads", "upload", "files", "gallery", "galleries",
-	"albums", "thumbs", "thumbnails", "static", "assets", "content",
-	"videos", "video", "clips", "movies", "mp4", "footage",
-}
-
-var extraAdminFolders = []string{
-	"attachments", "storage", "public", "data", "download", "downloads",
-	"wp-content/uploads", "media/users", "user/uploads", "users/uploads",
-	"users/images", "profile/photos", "profiles/photos", "files/users",
-}
 
 func applyBrowserHeaders(req *http.Request, referer, dest string) {
 	req.Header.Set("User-Agent", browserUA)
@@ -139,14 +122,28 @@ func originOf(raw string) string {
 	return u.Scheme + "://" + u.Host
 }
 
-func isLoginPath(p string) bool {
-	p = strings.ToLower(p)
-	for _, n := range []string{"/login", "/signin", "/sign-in", "/log-in", "/account/login", "/users/sign_in", "/auth/login"} {
-		if strings.Contains(p, n) {
-			return true
-		}
+// listingURLFromStart returns the directory index next to a start URL like
+// /gallery/index.html, so the crawl sniffs the listing itself.
+func listingURLFromStart(start *url.URL) string {
+	if start == nil {
+		return ""
 	}
-	return false
+	base := strings.ToLower(path.Base(start.Path))
+	switch base {
+	case "index.html", "index.htm", "index.php", "default.html", "default.htm":
+	default:
+		return ""
+	}
+	u := *start
+	dir := path.Dir(start.Path)
+	if dir == "." || dir == "/" {
+		u.Path = "/"
+	} else {
+		u.Path = strings.TrimSuffix(dir, "/") + "/"
+	}
+	u.RawQuery = ""
+	u.Fragment = ""
+	return u.String()
 }
 
 func isSoftMiss(err error, via string) bool {
@@ -160,40 +157,5 @@ func isSoftMiss(err error, via string) bool {
 	if strings.Contains(msg, "HTTP 403") || strings.Contains(msg, "HTTP 401") {
 		return true
 	}
-	if strings.Contains(msg, "HTTP 404") && (via == "folder-seed" || via == "users-seed" || via == "default-sitemap" || via == "robots-sitemap") {
-		return true
-	}
-	return false
-}
-
-func folderSeeds(base *url.URL, deep bool) []job {
-	if base == nil {
-		return nil
-	}
-	names := append([]string{}, userFolders...)
-	names = append(names, mediaFolders...)
-	if deep {
-		names = append(names, extraAdminFolders...)
-	}
-	seen := map[string]bool{}
-	var out []job
-	root := *base
-	root.Path = "/"
-	root.RawQuery = ""
-	root.Fragment = ""
-	for _, name := range names {
-		p := "/" + strings.Trim(name, "/") + "/"
-		if seen[p] {
-			continue
-		}
-		seen[p] = true
-		u := root
-		u.Path = p
-		via := "folder-seed"
-		if strings.Contains(p, "user") || strings.Contains(p, "member") || strings.Contains(p, "profile") || strings.Contains(p, "avatar") || p == "/u/" || strings.Contains(p, "people") || strings.Contains(p, "account") {
-			via = "users-seed"
-		}
-		out = append(out, job{kind: jobPage, url: u.String(), depth: 0, via: via, page: base.String()})
-	}
-	return out
+	return strings.Contains(msg, "HTTP 404") && (via == "default-sitemap" || via == "robots-sitemap")
 }

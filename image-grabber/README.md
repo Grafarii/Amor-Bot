@@ -34,9 +34,8 @@ Unlock those limits with the admin password **`batata`**:
 
 Unlocked admin crawl also:
 
-- Seeds `/users/`, `/media/`, `/uploads/` and other public folders
-- Continues from a login page into the rest of the site
-- Accepts **session cookies** (or a login form you have access to)
+- Follows directory indexes and links found on the page you start from
+- Accepts **session cookies** (or a login form you have access to) so it can fetch the same index you can after sign-in
 - Uses a browser User-Agent and Referer so hotlink/WAF **403** responses are retried, then skipped instead of failing the run
 - Never drops jobs with `queue full`
 

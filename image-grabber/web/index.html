@@ -164,7 +164,7 @@
           <label for="cookies">Session cookies after login</label>
           <textarea id="cookies" placeholder="sessionid=...; csrftoken=..."></textarea>
         </div>
-        <p class="note">Admin crawl seeds /users/, /media/, /uploads/ and the rest of the public folders, then continues past the login page using your session. It does not break into admin panels or bypass other people’s access.</p>
+        <p class="note">The grabber sniffs images and videos from the page or directory index you paste — links, listings, hidden markup, CSS/JS — not from a hardcoded folder list. Optional cookies are only used to fetch that same page. It does not break into admin panels.</p>
       </div>
     </div>
 
@@ -258,7 +258,7 @@
       pagesEl.max = on ? 50000 : 500;
       delayEl.min = on ? 0 : 80;
       document.getElementById('lockStatus').textContent = on
-        ? 'Testing mode unlocked — folders, users, session crawl, no queue drops.'
+        ? 'Testing mode unlocked — sniff the page index, no queue drops.'
         : 'Limits locked — same site, robots.txt, depth 4, 500 pages.';
       document.getElementById('lockStatus').classList.toggle('on', on);
       document.getElementById('adminExtra').style.display = on ? 'block' : 'none';
@@ -362,7 +362,7 @@
         return;
       }
       applyLock(true);
-      line('info', 'Admin testing limits unlocked. Session, users, and folder crawl are on.');
+      line('info', 'Admin testing limits unlocked. The crawl will sniff the page index you enter.');
     };
 
     async function saveImages(ids) {

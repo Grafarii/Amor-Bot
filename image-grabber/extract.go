@@ -16,6 +16,7 @@ var (
 	reMediaURL    = regexp.MustCompile(`(?i)(?:url|href|src|content)=["']([^"']+)["']`)
 	reHiddenClass = regexp.MustCompile(`(?i)(?:^|\s)(?:hidden|hide|invisible|sr-only|visually-hidden|d-none|is-hidden|u-hidden|display-none|visuallyhidden)(?:\s|$)`)
 	reDisplayNone = regexp.MustCompile(`(?i)display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?(?:\s|;|$)`)
+	reIndexFile   = regexp.MustCompile(`(?i)(?:^|[\s"'>=])([A-Za-z0-9._~+-]+\.(?:` + mediaExtAlt + `))`)
 )
 
 var voidTags = map[string]bool{
@@ -55,6 +56,7 @@ type ExtractResult struct {
 func extractHTML(page *url.URL, body []byte) ExtractResult {
 	var out ExtractResult
 	seenImg := map[string]bool{}
+	indexListing := isDirectoryIndex(page, body)
 	addImg := func(raw, via string, hidden bool) {
 		addImage(&out, seenImg, page, raw, via, hidden)
 	}
@@ -75,6 +77,9 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 		tt := z.Next()
 		switch tt {
 		case html.ErrorToken:
+			if indexListing {
+				sniffIndexListing(page, body, &out, seenImg)
+			}
 			rawPass(page, body, &out, seenImg)
 			return out
 
@@ -173,10 +178,14 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 			case "a":
 				href := attrs["href"]
 				if href != "" {
+					via := "anchor"
+					if indexListing {
+						via = "index-listing"
+					}
 					if looksLikeImage(href) {
-						addImg(href, "anchor", hidden)
+						addImg(href, via, hidden)
 					} else {
-						out.Pages = append(out.Pages, ResourceHit{URL: resolve(page, href), Via: "anchor"})
+						out.Pages = append(out.Pages, ResourceHit{URL: resolve(page, href), Via: via})
 					}
 				}
 			case "iframe", "frame":
@@ -426,6 +435,28 @@ func parseSrcset(v string) []string {
 		}
 	}
 	return out
+}
+
+func isDirectoryIndex(page *url.URL, body []byte) bool {
+	n := min(len(body), 8192)
+	s := strings.ToLower(string(body[:n]))
+	if strings.Contains(s, "index of") || strings.Contains(s, "directory listing") {
+		return true
+	}
+	if page != nil && strings.HasSuffix(page.Path, "/") && (strings.Contains(s, "[dir]") || strings.Contains(s, "<pre>")) {
+		return true
+	}
+	return false
+}
+
+func sniffIndexListing(page *url.URL, body []byte, out *ExtractResult, seen map[string]bool) {
+	text := html.UnescapeString(string(body))
+	for _, m := range reIndexFile.FindAllStringSubmatch(text, -1) {
+		if len(m) < 2 {
+			continue
+		}
+		addImage(out, seen, page, m[1], "index-listing", false)
+	}
 }
 
 func cssURLs(v string) []string {

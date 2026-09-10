@@ -474,16 +474,6 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 					enqueue(job{kind: jobPage, url: p.URL, depth: j.depth + 1, via: p.Via, page: pageURL.String()})
 				}
 			}
-			if isLoginPath(pageURL.Path) {
-				home := *pageURL
-				home.Path = "/"
-				home.RawQuery = ""
-				home.Fragment = ""
-				enqueue(job{kind: jobPage, url: home.String(), depth: 0, via: "after-login", page: pageURL.String()})
-				for _, sj := range folderSeeds(pageURL, cfg.neverDropQueue()) {
-					enqueue(sj)
-				}
-			}
 		case jobStyle:
 			if !cfg.ParseCSS {
 				return
@@ -555,17 +545,10 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		log("info", "using session cookies")
 	}
 	doLogin(ctx, client, cfg, log)
-	log("info", "starting at "+start.String())
+	log("info", "starting at "+start.String()+" — sniffing the page index")
 	enqueue(job{kind: jobPage, url: start.String(), depth: 0, via: "start", page: start.String()})
-	if isLoginPath(start.Path) {
-		root := *start
-		root.Path = "/"
-		root.RawQuery = ""
-		root.Fragment = ""
-		enqueue(job{kind: jobPage, url: root.String(), depth: 0, via: "after-login", page: start.String()})
-	}
-	for _, sj := range folderSeeds(start, cfg.neverDropQueue()) {
-		enqueue(sj)
+	if dir := listingURLFromStart(start); dir != "" && dir != start.String() {
+		enqueue(job{kind: jobPage, url: dir, depth: 0, via: "page-index", page: start.String()})
 	}
 
 	done := make(chan struct{})
