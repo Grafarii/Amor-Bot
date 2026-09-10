@@ -7,8 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -297,53 +295,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if delay > 0 {
 			time.Sleep(delay)
 		}
-		try := func(ref string) ([]byte, string, *url.URL, int, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
-			if err != nil {
-				return nil, "", nil, 0, err
-			}
-			applyBrowserHeaders(req, ref, dest)
-			resp, err := client.Do(req)
-			if err != nil {
-				return nil, "", nil, 0, err
-			}
-			defer resp.Body.Close()
-			final := resp.Request.URL
-			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-				io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
-				return nil, "", final, resp.StatusCode, fmt.Errorf("HTTP %d", resp.StatusCode)
-			}
-			limited := io.LimitReader(resp.Body, cfg.MaxBytes+1)
-			body, err := io.ReadAll(limited)
-			if err != nil {
-				return nil, "", final, resp.StatusCode, err
-			}
-			if int64(len(body)) > cfg.MaxBytes {
-				return nil, "", final, resp.StatusCode, fmt.Errorf("response too large")
-			}
-			ct := resp.Header.Get("Content-Type")
-			if i := strings.Index(ct, ";"); i >= 0 {
-				ct = ct[:i]
-			}
-			return body, strings.TrimSpace(strings.ToLower(ct)), final, resp.StatusCode, nil
-		}
-		ref := referer
-		if ref == "" {
-			ref = homeURL
-		}
-		body, ct, final, code, err := try(ref)
-		if err != nil && (code == 403 || code == 401) {
-			retryRef := homeURL
-			if ref == homeURL && start != nil {
-				retryRef = start.String()
-			}
-			if retryRef != ref {
-				body, ct, final, code, err = try(retryRef)
-			}
-			if err != nil && (code == 403 || code == 401) {
-				return nil, "", final, errForbidden
-			}
-		}
+		body, ct, final, err := getURLForgiving(ctx, client, raw, referer, dest, homeURL, cfg.MaxBytes)
 		return body, ct, final, err
 	}
 

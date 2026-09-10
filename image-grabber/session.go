@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -12,35 +13,82 @@ import (
 	"time"
 )
 
-const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 
 var errForbidden = errors.New("HTTP 403")
 
 func applyBrowserHeaders(req *http.Request, referer, dest string) {
+	applyBrowserHeadersOpts(req, referer, dest, false)
+}
+
+func applyBrowserHeadersOpts(req *http.Request, referer, dest string, withOrigin bool) {
 	req.Header.Set("User-Agent", browserUA)
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7")
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
-	switch dest {
-	case "image", "media":
-		req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/*,video/webm,video/mp4,video/*,*/*;q=0.8")
-		if dest == "media" {
-			req.Header.Set("Sec-Fetch-Dest", "empty")
-		} else {
-			req.Header.Set("Sec-Fetch-Dest", "image")
+	req.Header.Set("sec-ch-ua", `"Chromium";v="131", "Not_A Brand";v="24", "Google Chrome";v="131"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
+	site := "none"
+	if referer != "" {
+		if ru, err := url.Parse(referer); err == nil {
+			site = secFetchSite(ru, req.URL)
 		}
+	}
+	media := dest == "image" || dest == "media"
+	if media && looksLikeVideoURL(req.URL) {
+		req.Header.Set("Accept", "video/webm,video/mp4,video/*,*/*;q=0.8")
+		req.Header.Set("Sec-Fetch-Dest", "video")
 		req.Header.Set("Sec-Fetch-Mode", "no-cors")
-		req.Header.Set("Sec-Fetch-Site", "same-origin")
-	default:
-		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+	} else if media {
+		req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+		req.Header.Set("Sec-Fetch-Dest", "image")
+		req.Header.Set("Sec-Fetch-Mode", "no-cors")
+	} else {
+		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
 		req.Header.Set("Upgrade-Insecure-Requests", "1")
 		req.Header.Set("Sec-Fetch-Dest", "document")
 		req.Header.Set("Sec-Fetch-Mode", "navigate")
-		req.Header.Set("Sec-Fetch-Site", "same-origin")
+		req.Header.Set("Sec-Fetch-User", "?1")
 	}
+	req.Header.Set("Sec-Fetch-Site", site)
 	if referer != "" {
 		req.Header.Set("Referer", referer)
+	} else {
+		req.Header.Del("Referer")
 	}
+	if withOrigin {
+		if o := originOf(referer); o != "" {
+			req.Header.Set("Origin", o)
+		}
+	} else {
+		req.Header.Del("Origin")
+	}
+}
+
+func looksLikeVideoURL(u *url.URL) bool {
+	if u == nil {
+		return false
+	}
+	return isVideoName("", u.String(), "")
+}
+
+func secFetchSite(referer, req *url.URL) string {
+	if referer == nil || req == nil || referer.Host == "" {
+		return "none"
+	}
+	if strings.EqualFold(referer.Scheme, req.Scheme) && canonicalHost(referer) == canonicalHost(req) {
+		return "same-origin"
+	}
+	rh := strings.TrimPrefix(strings.ToLower(referer.Hostname()), "www.")
+	qh := strings.TrimPrefix(strings.ToLower(req.Hostname()), "www.")
+	if rh == "" || qh == "" {
+		return "cross-site"
+	}
+	if rh == qh || strings.HasSuffix(qh, "."+rh) || strings.HasSuffix(rh, "."+qh) {
+		return "same-site"
+	}
+	return "cross-site"
 }
 
 func newCrawlClient() *http.Client {
@@ -49,9 +97,16 @@ func newCrawlClient() *http.Client {
 		Timeout: 25 * time.Second,
 		Jar:     jar,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 8 {
+			if len(via) >= 10 {
 				return errors.New("too many redirects")
 			}
+			prev := via[len(via)-1]
+			dest := "document"
+			switch prev.Header.Get("Sec-Fetch-Dest") {
+			case "image", "video", "empty":
+				dest = "image"
+			}
+			applyBrowserHeaders(req, prev.URL.String(), dest)
 			return nil
 		},
 	}
@@ -158,4 +213,139 @@ func isSoftMiss(err error, via string) bool {
 		return true
 	}
 	return strings.Contains(msg, "HTTP 404") && (via == "default-sitemap" || via == "robots-sitemap")
+}
+
+func getURL(ctx context.Context, client *http.Client, raw, referer, dest string, withOrigin bool, maxBytes int64) ([]byte, string, *url.URL, int, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
+	if err != nil {
+		return nil, "", nil, 0, err
+	}
+	applyBrowserHeadersOpts(req, referer, dest, withOrigin)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, "", nil, 0, err
+	}
+	defer resp.Body.Close()
+	final := resp.Request.URL
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
+		return nil, "", final, resp.StatusCode, fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	if maxBytes <= 0 {
+		maxBytes = 80 << 20
+	}
+	limited := io.LimitReader(resp.Body, maxBytes+1)
+	body, err := io.ReadAll(limited)
+	if err != nil {
+		return nil, "", final, resp.StatusCode, err
+	}
+	if int64(len(body)) > maxBytes {
+		return nil, "", final, resp.StatusCode, fmt.Errorf("response too large")
+	}
+	ct := resp.Header.Get("Content-Type")
+	if i := strings.Index(ct, ";"); i >= 0 {
+		ct = ct[:i]
+	}
+	return body, strings.TrimSpace(strings.ToLower(ct)), final, resp.StatusCode, nil
+}
+
+func hotlinkReferers(page, raw, home string) []string {
+	var out []string
+	seen := map[string]bool{}
+	add := func(s string) {
+		if seen[s] {
+			return
+		}
+		seen[s] = true
+		out = append(out, s)
+	}
+	add(page)
+	add(home)
+	if u, err := url.Parse(page); err == nil && u.Host != "" {
+		add(u.Scheme + "://" + u.Host + "/")
+		host := u.Hostname()
+		if strings.HasPrefix(strings.ToLower(host), "www.") {
+			add(u.Scheme + "://" + host[4:] + "/")
+		} else if host != "" {
+			add(u.Scheme + "://www." + host + "/")
+		}
+	}
+	add(raw)
+	add("")
+	return out
+}
+
+// getURLForgiving fetches like a browser and retries the usual hotlink 403 cases
+// (wrong Referer, missing cookies, cross-site Sec-Fetch-Site). A true denial
+// still returns errForbidden so the crawl skips instead of failing.
+func getURLForgiving(ctx context.Context, client *http.Client, raw, page, dest, home string, maxBytes int64) ([]byte, string, *url.URL, error) {
+	if page == "" {
+		page = home
+	}
+	type attempt struct {
+		referer    string
+		dest       string
+		withOrigin bool
+	}
+	var tries []attempt
+	seen := map[string]bool{}
+	add := func(a attempt) {
+		key := a.referer + "\x00" + a.dest + "\x00" + fmt.Sprint(a.withOrigin)
+		if seen[key] {
+			return
+		}
+		seen[key] = true
+		tries = append(tries, a)
+	}
+	refs := hotlinkReferers(page, raw, home)
+	for _, ref := range refs {
+		add(attempt{referer: ref, dest: dest})
+	}
+	if dest != "document" {
+		add(attempt{referer: page, dest: "document"})
+		add(attempt{referer: page, dest: dest, withOrigin: true})
+		add(attempt{referer: "", dest: dest, withOrigin: false})
+	} else {
+		add(attempt{referer: page, dest: "image"})
+		add(attempt{referer: "", dest: "document"})
+	}
+
+	var lastFinal *url.URL
+	var lastErr error
+	var lastCode int
+	for i, a := range tries {
+		if i > 0 {
+			select {
+			case <-ctx.Done():
+				return nil, "", lastFinal, ctx.Err()
+			case <-time.After(20 * time.Millisecond):
+			}
+		}
+		body, ct, final, code, err := getURL(ctx, client, raw, a.referer, a.dest, a.withOrigin, maxBytes)
+		lastFinal, lastErr, lastCode = final, err, code
+		if err == nil {
+			return body, ct, final, nil
+		}
+		if code != http.StatusForbidden && code != http.StatusUnauthorized {
+			return body, ct, final, err
+		}
+		// Same headers once more so a Set-Cookie from the 403 can pass.
+		if i == 0 {
+			body, ct, final, code, err = getURL(ctx, client, raw, a.referer, a.dest, a.withOrigin, maxBytes)
+			lastFinal, lastErr, lastCode = final, err, code
+			if err == nil {
+				return body, ct, final, nil
+			}
+			if code != http.StatusForbidden && code != http.StatusUnauthorized {
+				return body, ct, final, err
+			}
+		}
+		if len(tries) > 8 && i >= 7 {
+			break
+		}
+	}
+	if lastCode == http.StatusForbidden || lastCode == http.StatusUnauthorized || (lastErr != nil && isSoftMiss(lastErr, "")) {
+		return nil, "", lastFinal, errForbidden
+	}
+	return nil, "", lastFinal, lastErr
 }

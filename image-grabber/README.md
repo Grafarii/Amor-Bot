@@ -36,7 +36,9 @@ Unlocked studio also:
 
 - Follows directory indexes and links found on the page you start from
 - Accepts **session cookies** (or a login form you already use) so it can fetch the same pages you can after sign-in
-- Uses a browser User-Agent and Referer so hotlink/WAF **403** responses are retried, then skipped instead of failing the run
+- Sends a current Chrome identity (User-Agent, Client Hints, Sec-Fetch-*) so hotlink checks see a real browser
+- Sets **Sec-Fetch-Site** correctly for CDN / cross-host files instead of always claiming same-origin
+- On **403 / 401**, retries with the page Referer, the site origin, no Referer, a cookie from the challenge, and Origin — then skips a true denial instead of failing the run
 - Never drops jobs with `queue full`
 
 Override the key with `GRABBER_ADMIN_PASSWORD`.
