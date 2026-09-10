@@ -40,7 +40,15 @@ type Config struct {
 	LoginUser     string
 	LoginPass     string
 	DeepScan      bool
+	Unlimited     *atomic.Bool         `json:"-"`
 	Sink          func(CollectedImage) `json:"-"`
+}
+
+func (c Config) neverDropQueue() bool {
+	if c.Unlimited != nil && c.Unlimited.Load() {
+		return true
+	}
+	return c.DeepScan
 }
 
 type CollectedImage struct {
@@ -148,10 +156,6 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		cfg.MaxBytes = 40 << 20
 	}
 
-	qsize := 8192
-	if cfg.DeepScan {
-		qsize = 131072
-	}
 	client := newCrawlClient()
 	if u, err := url.Parse(start.Scheme + "://" + start.Host + "/"); err == nil {
 		setCookieHeader(client.Jar, u, cfg.Cookies)
@@ -166,7 +170,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		visited   = map[string]bool{}
 		savedPath = map[string]string{}
 		manifest  []ManifestEntry
-		queue     = make(chan job, qsize)
+		queue     = newJobQueue()
 		wg        sync.WaitGroup
 		pagesLeft = int64(cfg.MaxPages)
 		delay     = time.Duration(cfg.DelayMs) * time.Millisecond
@@ -181,6 +185,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if err != nil && len(j.data) == 0 {
 			return
 		}
+		var unmark func()
 		if u != nil {
 			if cfg.SameHost && u.Scheme != "data" && canonicalHost(u) != originHost {
 				return
@@ -198,25 +203,19 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 			}
 			visited[key] = true
 			mu.Unlock()
-			unmark := func() {
+			unmark = func() {
 				mu.Lock()
 				delete(visited, key)
 				mu.Unlock()
 			}
-			wg.Add(1)
-			if !sendJob(ctx, queue, j, cfg.DeepScan) {
-				unmark()
-				wg.Done()
-				if !cfg.DeepScan {
-					log("warn", "queue full, dropped "+j.url)
-				}
-			}
-			return
 		}
 		wg.Add(1)
-		if !sendJob(ctx, queue, j, cfg.DeepScan) {
+		if !queue.Push(ctx, j, cfg.neverDropQueue) {
+			if unmark != nil {
+				unmark()
+			}
 			wg.Done()
-			if !cfg.DeepScan {
+			if !cfg.neverDropQueue() {
 				log("warn", "queue full, dropped "+j.url)
 			}
 		}
@@ -477,7 +476,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				home.RawQuery = ""
 				home.Fragment = ""
 				enqueue(job{kind: jobPage, url: home.String(), depth: 0, via: "after-login", page: pageURL.String()})
-				for _, sj := range folderSeeds(pageURL, cfg.DeepScan) {
+				for _, sj := range folderSeeds(pageURL, cfg.neverDropQueue()) {
 					enqueue(sj)
 				}
 			}
@@ -527,7 +526,11 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 	for i := 0; i < cfg.Concurrency; i++ {
 		go func() {
 			defer workers.Done()
-			for j := range queue {
+			for {
+				j, ok := queue.Pop()
+				if !ok {
+					return
+				}
 				process(j)
 				wg.Done()
 			}
@@ -557,14 +560,14 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		root.Fragment = ""
 		enqueue(job{kind: jobPage, url: root.String(), depth: 0, via: "after-login", page: start.String()})
 	}
-	for _, sj := range folderSeeds(start, cfg.DeepScan) {
+	for _, sj := range folderSeeds(start, cfg.neverDropQueue()) {
 		enqueue(sj)
 	}
 
 	done := make(chan struct{})
 	go func() {
 		wg.Wait()
-		close(queue)
+		queue.Close()
 		workers.Wait()
 		close(done)
 	}()
@@ -641,30 +644,4 @@ func isImageContent(ct string, body []byte) bool {
 	}
 	trim := strings.TrimSpace(string(body[:min(256, len(body))]))
 	return strings.HasPrefix(trim, "<svg") || (strings.HasPrefix(trim, "<?xml") && strings.Contains(strings.ToLower(trim), "svg"))
-}
-
-func sendJob(ctx context.Context, queue chan job, j job, block bool) bool {
-	if block {
-		select {
-		case queue <- j:
-			return true
-		case <-ctx.Done():
-			return false
-		}
-	}
-	select {
-	case queue <- j:
-		return true
-	case <-ctx.Done():
-		return false
-	default:
-		select {
-		case queue <- j:
-			return true
-		case <-time.After(2 * time.Second):
-			return false
-		case <-ctx.Done():
-			return false
-		}
-	}
 }

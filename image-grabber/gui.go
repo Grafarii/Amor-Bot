@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -60,7 +61,7 @@ type guiState struct {
 	mu       sync.Mutex
 	running  bool
 	cancel   context.CancelFunc
-	unlocked bool
+	unlocked atomic.Bool
 	images   map[int]CollectedImage
 	outDir   string
 }
@@ -96,12 +97,9 @@ func runGUI(web fs.FS) error {
 		if p, err := os.Executable(); err == nil {
 			exeDir = filepath.Dir(p)
 		}
-		st.mu.Lock()
-		unlocked := st.unlocked
-		st.mu.Unlock()
 		writeJSON(w, map[string]any{
 			"outDir":        filepath.Join(exeDir, "grabbed-images"),
-			"unlocked":      unlocked,
+			"unlocked":      st.unlocked.Load(),
 			"safeMaxDepth":  safeMaxDepth,
 			"safeMaxPages":  safeMaxPages,
 			"safeMinDelay":  safeMinDelay,
@@ -151,9 +149,7 @@ func runGUI(web fs.FS) error {
 			http.Error(w, "wrong password", 401)
 			return
 		}
-		st.mu.Lock()
-		st.unlocked = true
-		st.mu.Unlock()
+		st.unlocked.Store(true)
 		writeJSON(w, map[string]any{"ok": true, "unlocked": true})
 	})
 	mux.HandleFunc("/api/start", func(w http.ResponseWriter, r *http.Request) {
@@ -166,15 +162,15 @@ func runGUI(web fs.FS) error {
 			http.Error(w, "bad json", 400)
 			return
 		}
+		unlocked := st.unlocked.Load() || passwordOK(req.Password)
 		st.mu.Lock()
 		if st.running {
 			st.mu.Unlock()
 			http.Error(w, "already running", 409)
 			return
 		}
-		unlocked := st.unlocked || passwordOK(req.Password)
 		if unlocked {
-			st.unlocked = true
+			st.unlocked.Store(true)
 		}
 		st.images = map[int]CollectedImage{}
 		st.outDir = req.OutDir
@@ -207,6 +203,7 @@ func runGUI(web fs.FS) error {
 		cfg.LoginUser = req.LoginUser
 		cfg.LoginPass = req.LoginPass
 		boundMsg := applyBounds(&cfg, unlocked)
+		cfg.Unlimited = &st.unlocked
 		cfg.Sink = func(img CollectedImage) {
 			st.mu.Lock()
 			st.images[img.ID] = img
@@ -232,6 +229,9 @@ func runGUI(web fs.FS) error {
 				st.mu.Unlock()
 			}()
 			log := func(kind, msg string) {
+				if strings.Contains(msg, "queue full") && cfg.neverDropQueue() {
+					return
+				}
 				hub.send(map[string]any{"type": "log", "kind": kind, "msg": msg, "at": time.Now().Format("15:04:05")})
 			}
 			log("info", boundMsg)

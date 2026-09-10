@@ -55,7 +55,7 @@ func applyBounds(cfg *Config, unlocked bool) string {
 		if cfg.Concurrency < 10 {
 			cfg.Concurrency = 10
 		}
-		return "admin testing mode — folders, users, session crawl, and queue limits unlocked"
+		return "admin testing mode — folders, users, session crawl, and no queue-full drops"
 	}
 	cfg.SameHost = true
 	cfg.RespectRobots = true

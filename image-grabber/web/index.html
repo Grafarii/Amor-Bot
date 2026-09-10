@@ -272,6 +272,7 @@
     ev.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       if (msg.type === 'log') {
+        if (unlocked && /queue full/i.test(msg.msg || '')) return;
         if (msg.kind === 'page') pages++;
         if (msg.kind === 'found') {
           found++;
