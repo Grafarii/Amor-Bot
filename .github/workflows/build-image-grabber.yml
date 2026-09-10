@@ -1,0 +1,27 @@
+name: Build Image Grabber
+
+on:
+  push:
+    paths:
+      - "image-grabber/**"
+      - ".github/workflows/build-image-grabber.yml"
+  workflow_dispatch:
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Test
+        working-directory: image-grabber
+        run: go test ./...
+      - name: Build
+        working-directory: image-grabber
+        run: go build -ldflags="-s -w" -o dist/SiteImageGrabber.exe .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SiteImageGrabber-windows
+          path: image-grabber/dist/SiteImageGrabber.exe

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lumina</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%230f0d0b' width='32' height='32'/%3E%3Cpath fill='%23c9a36a' d='M16 4l9 6.5v11L16 28l-9-6.5v-11L16 4zm0 3.2L10 11.5v9L16 24.8l6-4.3v-9L16 7.2z'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0c0a08;
+      --bg2: #14110e;
+      --panel: #181410;
+      --ink: #f4efe6;
+      --muted: #9a9084;
+      --line: #3a322b;
+      --copper: #c9a36a;
+      --copper-dim: #8f7040;
+      --ok: #b7d7b0;
+      --err: #e08b7a;
+      --hid: #cbb8e6;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+    body {
+      min-height: 100vh;
+      font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+      background-image:
+        radial-gradient(900px 420px at 8% -8%, rgba(201,163,106,.11), transparent 55%),
+        radial-gradient(700px 360px at 100% 0%, rgba(90,70,40,.12), transparent 45%),
+        linear-gradient(180deg, #15120f 0%, var(--bg) 38%);
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 36px 28px 72px; }
+    header.top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 28px; padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .mono {
+      width: 36px; height: 36px; flex: none;
+      border: 1px solid var(--copper-dim); color: var(--copper);
+      display: grid; place-items: center;
+    }
+    .wordmark {
+      font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
+      font-size: 1.55rem; font-weight: 500; letter-spacing: .28em;
+      text-transform: uppercase; margin: 0; line-height: 1;
+    }
+    .wordmark span { color: var(--copper); }
+    .edition {
+      font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--copper); text-align: right;
+    }
+    .edition b { display: block; color: var(--ink); letter-spacing: .16em; font-weight: 500; margin-bottom: 4px; }
+    .lede {
+      font-family: Palatino, Georgia, serif; font-style: italic;
+      font-size: 1.35rem; color: var(--ink); margin: 0 0 8px; max-width: 36rem;
+      font-weight: 400; line-height: 1.35;
+    }
+    .lede-sub { color: var(--muted); margin: 0 0 32px; max-width: 40rem; font-size: 14.5px; }
+    .command {
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 22px 22px 20px; margin-bottom: 18px;
+    }
+    .command-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;
+    }
+    label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); margin-bottom: 8px; }
+    input[type=text], input[type=number], input[type=password], textarea {
+      width: 100%; background: var(--bg2); color: var(--ink); border: 1px solid var(--line);
+      border-radius: 0; padding: 12px 14px; font: inherit;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--copper); }
+    textarea { min-height: 64px; resize: vertical; }
+    #siteChip {
+      min-height: 18px; margin-top: 8px; font-size: 12px; color: var(--copper);
+      letter-spacing: .04em; font-family: Palatino, Georgia, serif; font-style: italic;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .walk {
+      border: 1px solid var(--line); background: transparent; padding: 0; margin-bottom: 18px;
+    }
+    .walk summary {
+      list-style: none; cursor: pointer; padding: 14px 18px;
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+    }
+    .walk summary::-webkit-details-marker { display: none; }
+    .walk summary:hover { color: var(--copper); }
+    .walk-body { padding: 0 18px 18px; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin-top: 8px; }
+    .checks label { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--ink); display: flex; gap: 8px; align-items: center; cursor: pointer; }
+    .btns { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 0; padding: 13px 22px; font: 600 12px/1 inherit; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+    .go { background: var(--copper); color: #1a140c; }
+    .go:disabled { opacity: .45; cursor: not-allowed; }
+    .stop { background: #3a2420; color: #f0c8bc; }
+    .quit { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 16px; }
+    .stat { background: var(--panel); padding: 16px 10px; text-align: center; }
+    .stat b { display: block; font-family: Palatino, Georgia, serif; font-size: 1.55rem; font-weight: 500; }
+    .stat span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .14em; }
+    #log {
+      height: 132px; overflow: auto; background: #090807; border: 1px solid var(--line);
+      padding: 14px; font: 12px/1.55 ui-monospace, Consolas, monospace; white-space: pre-wrap;
+      margin-bottom: 28px; color: #cfc6ba;
+    }
+    .k-info { color: var(--muted); }
+    .k-page { color: var(--ink); }
+    .k-save, .k-found { color: var(--ok); }
+    .k-scan { color: var(--copper); }
+    .k-skip { color: var(--muted); }
+    .k-error, .k-err { color: var(--err); }
+    .k-warn { color: var(--copper); }
+    .note { color: var(--muted); font-size: 12.5px; margin-top: 14px; line-height: 1.55; }
+    .admin {
+      margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line);
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;
+    }
+    .admin button { background: #2a241c; color: var(--copper); border: 1px solid var(--line); }
+    .lock { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .lock.on { color: var(--ok); }
+    .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .gallery-head h2 {
+      margin: 0; font-family: Palatino, Georgia, serif; font-weight: 500;
+      font-size: 1.5rem; letter-spacing: .02em;
+    }
+    .gallery-head h2 span { color: var(--copper); font-style: italic; }
+    .gallery-head .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 12px; }
+    .card { background: var(--panel); border: 1px solid var(--line); cursor: pointer; }
+    .card.sel { border-color: var(--copper); box-shadow: inset 0 0 0 1px var(--copper); }
+    .card img, .card video, .card .ph {
+      width: 100%; height: 168px; object-fit: contain; background: #090807; display: block;
+    }
+    .card .meta { padding: 10px 12px 12px; font-size: 11px; color: var(--muted); line-height: 1.35; }
+    .card .meta b { color: var(--ink); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+    .card .hid { color: var(--hid); }
+    .card .cdn { color: var(--copper); }
+    .empty {
+      color: var(--muted); padding: 48px 12px; text-align: center;
+      border: 1px dashed var(--line); font-family: Palatino, Georgia, serif; font-style: italic;
+    }
+    .saveb { background: #243028; color: var(--ok); }
+    @media (max-width: 760px) {
+      .command-row, .row, .checks, .stats, .admin { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      header.top { align-items: flex-start; }
+      .edition { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="mono" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 32 32" fill="currentColor"><path d="M16 3.5l10 7.2v10.6L16 28.5l-10-7.2V10.7L16 3.5zm0 3.4L9.2 11.7v8.6L16 25.1l6.8-4.8v-8.6L16 6.9z"/></svg>
+        </div>
+        <h1 class="wordmark">Lu<span>mina</span></h1>
+      </div>
+      <div class="edition"><b>Site studio</b> Collection edition</div>
+    </header>
+    <p class="lede">Every image a website publishes.</p>
+    <p class="lede-sub">Lumina walks that one site — its pages, its directories, its sitemaps — and takes every still and motion file it actually uses, including files served from a CDN. It does not wander the web, and it does not break into anyone’s account.</p>
+
+    <div class="command">
+      <div class="command-row">
+        <div>
+          <label for="url">The site</label>
+          <input id="url" type="text" placeholder="https://the-site.com/  or  a directory index on that host" />
+          <div id="siteChip">Paste the origin. Lumina stays on that host’s pages.</div>
+        </div>
+        <button class="go" id="start" type="button">Collect</button>
+      </div>
+      <div class="btns" style="margin-top:14px">
+        <button class="stop" id="stop" type="button">Stop</button>
+        <button class="quit" id="quit" type="button">Quit</button>
+      </div>
+    </div>
+
+    <details class="walk">
+      <summary>Walk, archive &amp; studio</summary>
+      <div class="walk-body">
+        <div class="row">
+          <div>
+            <label for="out">Collection folder</label>
+            <input id="out" type="text" />
+          </div>
+          <div class="row" style="margin-top:0; grid-template-columns: 1fr 1fr;">
+            <div>
+              <label for="depth">Depth</label>
+              <input id="depth" type="number" min="0" max="4" value="4" />
+            </div>
+            <div>
+              <label for="pages">Pages</label>
+              <input id="pages" type="number" min="1" max="500" value="500" />
+            </div>
+          </div>
+        </div>
+        <div class="checks">
+          <label class="bound"><input id="sameHost" type="checkbox" checked disabled /> Stay on this site’s pages</label>
+          <label><input id="sitemap" type="checkbox" checked /> Read this site’s sitemap</label>
+          <label><input id="css" type="checkbox" checked /> Stylesheets &amp; backgrounds</label>
+          <label><input id="js" type="checkbox" checked /> Scripts &amp; JSON</label>
+          <label><input id="comments" type="checkbox" checked /> Comments &amp; hidden markup</label>
+          <label><input id="datauri" type="checkbox" checked /> Inline data: images</label>
+          <label class="bound"><input id="robots" type="checkbox" checked disabled /> Respect robots.txt</label>
+          <label class="bound">Delay ms <input id="delay" type="number" min="80" max="5000" value="80" style="width:90px; display:inline-block;" /></label>
+        </div>
+        <p class="note">For sites you own or have permission to copy. Pages never leave this origin. Images and video the site points at — even on another host — still enter the collection.</p>
+        <div class="admin">
+          <div>
+            <label for="adminPass">Studio key</label>
+            <input id="adminPass" type="password" autocomplete="off" placeholder="Unlock a deeper walk of this site" />
+          </div>
+          <button id="unlock" type="button">Unlock</button>
+        </div>
+        <p class="lock" id="lockStatus">This site — pages stay here; every image it publishes is taken.</p>
+        <div id="adminExtra" style="display:none">
+          <div class="row">
+            <div>
+              <label for="loginUrl">Login page you already use (optional)</label>
+              <input id="loginUrl" type="text" placeholder="https://the-site.com/login" />
+            </div>
+            <div class="row" style="margin-top:0; grid-template-columns: 1fr 1fr;">
+              <div>
+                <label for="loginUser">Username</label>
+                <input id="loginUser" type="text" autocomplete="username" />
+              </div>
+              <div>
+                <label for="loginPass">Password</label>
+                <input id="loginPass" type="password" autocomplete="current-password" />
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label for="cookies">Session cookies you already have</label>
+            <textarea id="cookies" placeholder="sessionid=...; csrftoken=..."></textarea>
+          </div>
+          <p class="note">Unlock raises page depth on this site. Cookies and a login form only fetch pages you can already open. This is not a bypass.</p>
+        </div>
+      </div>
+    </details>
+
+    <div class="stats">
+      <div class="stat"><b id="sPages">0</b><span>Pages</span></div>
+      <div class="stat"><b id="sFound">0</b><span>Found</span></div>
+      <div class="stat"><b id="sSaved">0</b><span>On disk</span></div>
+      <div class="stat"><b id="sHidden">0</b><span>Hidden</span></div>
+      <div class="stat"><b id="sErrors">0</b><span>Errors</span></div>
+    </div>
+    <div id="log"></div>
+    <div class="gallery-head">
+      <div>
+        <h2>Collection <span id="gCount">0</span></h2>
+        <div class="hint">Nothing is written until you save. Click a frame to select it.</div>
+      </div>
+      <div class="btns" style="margin-top:0">
+        <button class="saveb" id="saveSel" type="button">Save selected</button>
+        <button class="saveb" id="saveAll" type="button">Save all</button>
+      </div>
+    </div>
+    <div id="gallery" class="gallery"><div class="empty" id="gEmpty">The collection fills here after you collect this site.</div></div>
+  </div>
+  <script>
+    const logEl = document.getElementById('log');
+    const startBtn = document.getElementById('start');
+    const urlEl = document.getElementById('url');
+    const chip = document.getElementById('siteChip');
+    let found = 0, saved = 0, hidden = 0, pages = 0, errors = 0;
+    let unlocked = false;
+    let originHost = '';
+    const selected = new Set();
+
+    function hostOf(u) {
+      try { return new URL(u).host; } catch { return ''; }
+    }
+    function paintChip() {
+      const host = hostOf(urlEl.value.trim());
+      chip.textContent = host
+        ? 'Collecting ' + host + ' — pages stay on this host; CDN files it uses still come in.'
+        : 'Paste the origin. Lumina stays on that host’s pages.';
+    }
+    urlEl.addEventListener('input', paintChip);
+    urlEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); startBtn.click(); }
+    });
+
+    function clearGallery() {
+      selected.clear();
+      gallery.innerHTML = '';
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.id = 'gEmpty';
+      empty.textContent = 'The collection fills here after you collect this site.';
+      gallery.appendChild(empty);
+      gCount.textContent = '0';
+    }
+
+    function addCard(img) {
+      const empty = document.getElementById('gEmpty');
+      if (empty) empty.remove();
+      const card = document.createElement('div');
+      card.className = 'card sel';
+      card.dataset.id = String(img.id);
+      selected.add(img.id);
+      const video = /^(video\/)/i.test(img.contentType || '') ||
+        /\.(mp4|m4v|mov|webm|ogv|avi|mkv|3gp|mpeg|mpg|flv|wmv)(\?|$)/i.test(img.url || img.name || '');
+      const pic = document.createElement(video ? 'video' : 'img');
+      pic.alt = img.name || img.url;
+      pic.src = img.preview;
+      if (video) {
+        pic.muted = true;
+        pic.playsInline = true;
+        pic.preload = 'metadata';
+        pic.controls = true;
+      } else {
+        pic.loading = 'lazy';
+      }
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const title = document.createElement('b');
+      title.textContent = (img.name || '').split('/').pop() || img.url;
+      const via = document.createElement('div');
+      const imgHost = hostOf(img.url);
+      const off = imgHost && originHost && imgHost !== originHost;
+      via.textContent = (video ? 'video · ' : '') + (off ? imgHost + ' · ' : '') + img.via + (img.hidden ? ' · hidden' : '');
+      if (img.hidden) via.className = 'hid';
+      else if (off) via.className = 'cdn';
+      meta.appendChild(title);
+      meta.appendChild(via);
+      card.appendChild(pic);
+      card.appendChild(meta);
+      card.onclick = () => {
+        if (selected.has(img.id)) { selected.delete(img.id); card.classList.remove('sel'); }
+        else { selected.add(img.id); card.classList.add('sel'); }
+      };
+      gallery.appendChild(card);
+      gCount.textContent = String(gallery.querySelectorAll('.card').length);
+    }
+
+    function applyLock(on) {
+      unlocked = on;
+      const same = document.getElementById('sameHost');
+      const rob = document.getElementById('robots');
+      const depthEl = document.getElementById('depth');
+      const pagesEl = document.getElementById('pages');
+      const delayEl = document.getElementById('delay');
+      same.disabled = !on;
+      rob.disabled = !on;
+      depthEl.max = on ? 50 : 4;
+      pagesEl.max = on ? 50000 : 500;
+      delayEl.min = on ? 0 : 80;
+      document.getElementById('lockStatus').textContent = on
+        ? 'Studio unlocked — deeper walk of this site, no queue drops.'
+        : 'This site — pages stay here; every image it publishes is taken.';
+      document.getElementById('lockStatus').classList.toggle('on', on);
+      document.getElementById('adminExtra').style.display = on ? 'block' : 'none';
+      document.querySelectorAll('.bound').forEach((el) => el.classList.toggle('locked-ctl', !on));
+      if (!on) {
+        same.checked = true;
+        rob.checked = true;
+        if (Number(depthEl.value) > 4) depthEl.value = 4;
+        if (Number(pagesEl.value) > 500) pagesEl.value = 500;
+        if (Number(delayEl.value) < 80) delayEl.value = 80;
+      }
+    }
+
+    fetch('/api/defaults').then(r => r.json()).then(d => {
+      document.getElementById('out').value = d.outDir || 'grabbed-images';
+      applyLock(!!d.unlocked);
+    });
+
+    const ev = new EventSource('/api/events');
+    ev.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'log') {
+        if (unlocked && /queue full/i.test(msg.msg || '')) return;
+        if (/HTTP 401|HTTP 403|HTTP 404|HTTP 410/i.test(msg.msg || '') && (msg.kind === 'error' || msg.kind === 'skip')) {
+          if (msg.kind === 'error') msg.kind = 'skip';
+          return;
+        }
+        if (msg.kind === 'page') pages++;
+        if (msg.kind === 'found') {
+          found++;
+          if ((msg.msg || '').includes('[hidden]')) hidden++;
+        }
+        if (msg.kind === 'error') errors++;
+        paintStats();
+        line(msg.kind, '[' + msg.at + '] ' + msg.msg);
+      } else if (msg.type === 'image') {
+        addCard(msg);
+      } else if (msg.type === 'error') {
+        line('error', msg.msg);
+        startBtn.disabled = false;
+      } else if (msg.type === 'done') {
+        startBtn.disabled = false;
+        if (msg.ok) {
+          pages = msg.pages; found = msg.found; hidden = msg.hidden; errors = msg.errors;
+          paintStats();
+          line('info', 'Collection complete. Review below — nothing was saved to disk yet.');
+        }
+      }
+    };
+
+    function paintStats() {
+      sPages.textContent = pages;
+      sFound.textContent = found;
+      sSaved.textContent = saved;
+      sHidden.textContent = hidden;
+      sErrors.textContent = errors;
+    }
+    function line(kind, text) {
+      const d = document.createElement('div');
+      d.className = 'k-' + kind;
+      d.textContent = text;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    startBtn.onclick = async () => {
+      found = saved = hidden = pages = errors = 0;
+      paintStats();
+      logEl.textContent = '';
+      clearGallery();
+      originHost = hostOf(urlEl.value.trim());
+      paintChip();
+      startBtn.disabled = true;
+      const body = {
+        url: urlEl.value.trim(),
+        outDir: document.getElementById('out').value.trim(),
+        maxDepth: Number(document.getElementById('depth').value),
+        maxPages: Number(document.getElementById('pages').value),
+        sameHost: document.getElementById('sameHost').checked,
+        parseSitemap: document.getElementById('sitemap').checked,
+        parseCss: document.getElementById('css').checked,
+        parseJs: document.getElementById('js').checked,
+        parseComments: document.getElementById('comments').checked,
+        saveDataUri: document.getElementById('datauri').checked,
+        respectRobots: document.getElementById('robots').checked,
+        delayMs: Number(document.getElementById('delay').value),
+        password: document.getElementById('adminPass').value,
+        cookies: document.getElementById('cookies').value.trim(),
+        loginUrl: document.getElementById('loginUrl').value.trim(),
+        loginUser: document.getElementById('loginUser').value.trim(),
+        loginPass: document.getElementById('loginPass').value
+      };
+      const res = await fetch('/api/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+      if (!res.ok) {
+        startBtn.disabled = false;
+        line('error', await res.text());
+      }
+    };
+    document.getElementById('stop').onclick = () => fetch('/api/stop', { method: 'POST' });
+    document.getElementById('quit').onclick = () => fetch('/api/quit', { method: 'POST' }).then(() => line('info', 'Closing…'));
+    document.getElementById('unlock').onclick = async () => {
+      const password = document.getElementById('adminPass').value;
+      const res = await fetch('/api/unlock', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ password }) });
+      if (!res.ok) {
+        line('error', 'Wrong studio key.');
+        applyLock(false);
+        return;
+      }
+      applyLock(true);
+      line('info', 'Studio unlocked. Deeper walk of this site.');
+    };
+
+    async function saveImages(ids) {
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ outDir: document.getElementById('out').value.trim(), ids })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        line('error', 'Save failed');
+        return;
+      }
+      saved = data.saved || 0;
+      paintStats();
+      line('info', 'Saved ' + saved + ' file(s) to ' + data.outDir);
+    }
+    document.getElementById('saveSel').onclick = () => saveImages([...selected]);
+    document.getElementById('saveAll').onclick = () => saveImages([]);
+  </script>
+</body>
+</html>
