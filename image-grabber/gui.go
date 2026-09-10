@@ -233,6 +233,12 @@ func runGUI(web fs.FS) error {
 				if strings.Contains(msg, "queue full") && cfg.neverDropQueue() {
 					return
 				}
+				if strings.Contains(msg, "HTTP 403") || strings.Contains(msg, "HTTP 401") {
+					return
+				}
+				if kind == "error" && strings.Contains(msg, "HTTP 404") {
+					kind = "skip"
+				}
 				hub.send(map[string]any{"type": "log", "kind": kind, "msg": msg, "at": time.Now().Format("15:04:05")})
 			}
 			log("info", boundMsg)

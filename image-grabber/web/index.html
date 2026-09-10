@@ -376,6 +376,10 @@
       const msg = JSON.parse(e.data);
       if (msg.type === 'log') {
         if (unlocked && /queue full/i.test(msg.msg || '')) return;
+        if (/HTTP 401|HTTP 403|HTTP 404|HTTP 410/i.test(msg.msg || '') && (msg.kind === 'error' || msg.kind === 'skip')) {
+          if (msg.kind === 'error') msg.kind = 'skip';
+          return;
+        }
         if (msg.kind === 'page') pages++;
         if (msg.kind === 'found') {
           found++;

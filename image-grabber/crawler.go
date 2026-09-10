@@ -291,6 +291,18 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		log("save", filepath.Base(written)+" ← "+hit.Via+mark)
 	}
 
+	noteMiss := func(j job, err error, errLine string) {
+		if isSoftMiss(err, j.via) {
+			stats.Skipped.Add(1)
+			if !isQuietMiss(err, j.kind, j.via) {
+				log("skip", j.url+" ("+err.Error()+")")
+			}
+			return
+		}
+		stats.Errors.Add(1)
+		log("error", errLine)
+	}
+
 	fetch := func(raw, referer, dest string) ([]byte, string, *url.URL, error) {
 		if delay > 0 {
 			time.Sleep(delay)
@@ -329,13 +341,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		if j.kind == jobImage {
 			body, ct, final, err := fetch(j.url, j.page, "media")
 			if err != nil {
-				if isSoftMiss(err, j.via) {
-					stats.Skipped.Add(1)
-					log("skip", j.url+" ("+err.Error()+")")
-					return
-				}
-				stats.Errors.Add(1)
-				log("error", "download "+j.url+": "+err.Error())
+				noteMiss(j, err, "download "+j.url+": "+err.Error())
 				return
 			}
 			if !isMediaContent(ct, body) && !looksLikeImage(j.url) {
@@ -361,16 +367,7 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 
 		body, ct, final, err := fetch(j.url, j.page, "document")
 		if err != nil {
-			if j.kind == jobSitemap && (j.via == "default-sitemap" || strings.Contains(err.Error(), "HTTP 404")) {
-				return
-			}
-			if isSoftMiss(err, j.via) {
-				stats.Skipped.Add(1)
-				log("skip", j.url+" ("+err.Error()+")")
-				return
-			}
-			stats.Errors.Add(1)
-			log("error", j.url+": "+err.Error())
+			noteMiss(j, err, j.url+": "+err.Error())
 			return
 		}
 		pageURL := final

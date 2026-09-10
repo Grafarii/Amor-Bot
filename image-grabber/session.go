@@ -208,11 +208,49 @@ func isSoftMiss(err error, via string) bool {
 	if errors.Is(err, errForbidden) {
 		return true
 	}
+	code := httpStatusFromErr(err)
+	switch code {
+	case 401, 403, 404, 405, 406, 408, 410, 429, 451:
+		return true
+	}
 	msg := err.Error()
 	if strings.Contains(msg, "HTTP 403") || strings.Contains(msg, "HTTP 401") {
 		return true
 	}
 	return strings.Contains(msg, "HTTP 404") && (via == "default-sitemap" || via == "robots-sitemap")
+}
+
+func httpStatusFromErr(err error) int {
+	if err == nil {
+		return 0
+	}
+	msg := err.Error()
+	var n int
+	if _, scanErr := fmt.Sscanf(msg, "HTTP %d", &n); scanErr == nil {
+		return n
+	}
+	return 0
+}
+
+func isQuietMiss(err error, kind jobKind, via string) bool {
+	if !isSoftMiss(err, via) {
+		return false
+	}
+	code := httpStatusFromErr(err)
+	if errors.Is(err, errForbidden) || code == 401 || code == 403 {
+		return true
+	}
+	if code == 404 || strings.Contains(err.Error(), "HTTP 404") {
+		switch kind {
+		case jobStyle, jobScript, jobSitemap, jobManifest:
+			return true
+		}
+		switch via {
+		case "default-sitemap", "robots-sitemap", "stylesheet", "script-src":
+			return true
+		}
+	}
+	return false
 }
 
 func getURL(ctx context.Context, client *http.Client, raw, referer, dest string, withOrigin bool, maxBytes int64) ([]byte, string, *url.URL, int, error) {

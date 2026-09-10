@@ -244,6 +244,62 @@ func TestForbiddenIsSkippedNotError(t *testing.T) {
 	}
 }
 
+func TestMissingCSSAndForbiddenAreNotErrors(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><head><link rel="stylesheet" href="/gone.css"></head>
+<body><img src="/ok.png"><img src="/blocked.png"></body></html>`))
+	})
+	mux.HandleFunc("/ok.png", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	})
+	mux.HandleFunc("/blocked.png", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+	mux.HandleFunc("/gone.css", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var kinds []string
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(CollectedImage) {}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	stats, err := Run(ctx, cfg, func(kind, msg string) {
+		mu.Lock()
+		if kind == "error" {
+			kinds = append(kinds, msg)
+		}
+		mu.Unlock()
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Errors.Load() != 0 {
+		t.Fatalf("missing css / 403 must not increment errors, got %d logs=%v", stats.Errors.Load(), kinds)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	for _, m := range kinds {
+		if strings.Contains(m, "403") || strings.Contains(m, "404") {
+			t.Fatalf("logged as error: %s", m)
+		}
+	}
+}
+
 func TestCrawlCollectsMp4AndOddImageExt(t *testing.T) {
 	mp4 := []byte{0x00, 0x00, 0x00, 0x18, 'f', 't', 'y', 'p', 'i', 's', 'o', 'm', 0x00, 0x00, 0x02, 0x00, 'i', 's', 'o', 'm'}
 	mux := http.NewServeMux()
