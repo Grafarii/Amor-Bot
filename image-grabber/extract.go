@@ -11,13 +11,13 @@ import (
 )
 
 var (
-	reImageExt = regexp.MustCompile(`(?i)\.(jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?|#|$)`)
-	reCSSURL   = regexp.MustCompile(`(?i)url\(\s*['"]?([^'")]+)['"]?\s*\)`)
-	reQuotedImg = regexp.MustCompile(`(?i)['"]([^'"]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^'"]*)?)['"]`)
-	reBareImg   = regexp.MustCompile(`(?i)(?:https?:)?//[^\s"'<>\\]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?|/[^\s"'<>\\]*\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?`)
-	reDataURI   = regexp.MustCompile(`(?i)data:image/([a-z0-9.+-]+);base64,([A-Za-z0-9+/=\s]+)`)
-	reXMLLoc    = regexp.MustCompile(`(?is)<(?:image:)?loc>\s*([^<]+?)\s*</(?:image:)?loc>`)
-	reMediaURL  = regexp.MustCompile(`(?i)(?:url|href|src|content)=["']([^"']+)["']`)
+	reImageExt    = regexp.MustCompile(`(?i)\.(jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?|#|$)`)
+	reCSSURL      = regexp.MustCompile(`(?i)url\(\s*['"]?([^'")]+)['"]?\s*\)`)
+	reQuotedImg   = regexp.MustCompile(`(?i)['"]([^'"]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^'"]*)?)['"]`)
+	reBareImg     = regexp.MustCompile(`(?i)(?:https?:)?//[^\s"'<>\\]+\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?|/[^\s"'<>\\]*\.(?:jpe?g|png|gif|webp|svg|bmp|ico|avif|tiff?|jfif|apng|heic|heif|jxl)(?:\?[^\s"'<>\\]*)?`)
+	reDataURI     = regexp.MustCompile(`(?i)data:image/([a-z0-9.+-]+);base64,([A-Za-z0-9+/=\s]+)`)
+	reXMLLoc      = regexp.MustCompile(`(?is)<(?:image:)?loc>\s*([^<]+?)\s*</(?:image:)?loc>`)
+	reMediaURL    = regexp.MustCompile(`(?i)(?:url|href|src|content)=["']([^"']+)["']`)
 	reHiddenClass = regexp.MustCompile(`(?i)(?:^|\s)(?:hidden|hide|invisible|sr-only|visually-hidden|d-none|is-hidden|u-hidden|display-none|visuallyhidden)(?:\s|$)`)
 	reDisplayNone = regexp.MustCompile(`(?i)display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0(?:\.0+)?(?:\s|;|$)`)
 )
@@ -111,6 +111,9 @@ func extractHTML(page *url.URL, body []byte) ExtractResult {
 				addImg(attrs["data-background"], "data-background", hidden)
 				addImg(attrs["data-background-image"], "data-background-image", hidden)
 				addImg(attrs["data-src-retina"], "data-src-retina", hidden)
+				addImg(attrs["data-avatar"], "data-avatar", hidden)
+				addImg(attrs["data-user-image"], "data-user-image", hidden)
+				addImg(attrs["data-profile-image"], "data-profile-image", hidden)
 				for _, u := range parseSrcset(attrs["srcset"]) {
 					addImg(u, "srcset", hidden)
 				}
@@ -365,7 +368,7 @@ func addDataURI(out *ExtractResult, seen map[string]bool, page *url.URL, raw, mi
 		Page:   page.String(),
 		Via:    via,
 		Hidden: hidden,
-		Data:   []byte(strings.Map(func(r rune) rune {
+		Data: []byte(strings.Map(func(r rune) rune {
 			if r == '\n' || r == '\r' || r == ' ' || r == '\t' {
 				return -1
 			}

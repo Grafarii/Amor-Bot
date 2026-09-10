@@ -51,7 +51,11 @@ func applyBounds(cfg *Config, unlocked bool) string {
 		if cfg.MaxBytes > adminMaxBytes {
 			cfg.MaxBytes = adminMaxBytes
 		}
-		return "admin testing mode — off-site, robots, and size limits unlocked"
+		cfg.DeepScan = true
+		if cfg.Concurrency < 10 {
+			cfg.Concurrency = 10
+		}
+		return "admin testing mode — folders, users, session crawl, and queue limits unlocked"
 	}
 	cfg.SameHost = true
 	cfg.RespectRobots = true

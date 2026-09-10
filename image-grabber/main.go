@@ -29,6 +29,10 @@ func main() {
 	flag.BoolVar(&cfg.SaveDataURI, "data-uri", cfg.SaveDataURI, "save inline data:image embeds")
 	flag.BoolVar(&cfg.RespectRobots, "robots", cfg.RespectRobots, "respect robots.txt")
 	flag.IntVar(&cfg.DelayMs, "delay", cfg.DelayMs, "milliseconds to wait between requests")
+	flag.StringVar(&cfg.Cookies, "cookies", "", "session Cookie header after login")
+	flag.StringVar(&cfg.LoginURL, "login-url", "", "optional login form URL")
+	flag.StringVar(&cfg.LoginUser, "login-user", "", "username for login-url")
+	flag.StringVar(&cfg.LoginPass, "login-pass", "", "password for login-url")
 	adminPass := flag.String("admin-password", "", "admin password to unlock testing limits")
 	flag.Parse()
 

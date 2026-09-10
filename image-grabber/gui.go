@@ -79,6 +79,10 @@ type startReq struct {
 	RespectRobots bool   `json:"respectRobots"`
 	DelayMs       int    `json:"delayMs"`
 	Password      string `json:"password"`
+	Cookies       string `json:"cookies"`
+	LoginURL      string `json:"loginUrl"`
+	LoginUser     string `json:"loginUser"`
+	LoginPass     string `json:"loginPass"`
 }
 
 func runGUI(web fs.FS) error {
@@ -198,6 +202,10 @@ func runGUI(web fs.FS) error {
 		if req.DelayMs >= 0 {
 			cfg.DelayMs = req.DelayMs
 		}
+		cfg.Cookies = req.Cookies
+		cfg.LoginURL = req.LoginURL
+		cfg.LoginUser = req.LoginUser
+		cfg.LoginPass = req.LoginPass
 		boundMsg := applyBounds(&cfg, unlocked)
 		cfg.Sink = func(img CollectedImage) {
 			st.mu.Lock()

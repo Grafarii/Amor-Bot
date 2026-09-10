@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const userAgent = "SiteImageGrabber/1.0 (desktop image collector; +https://github.com/Grafarii/Amor-Bot)"
+const userAgent = browserUA
 
 type Config struct {
 	StartURL      string
@@ -35,6 +35,11 @@ type Config struct {
 	Concurrency   int
 	DelayMs       int
 	MaxBytes      int64
+	Cookies       string
+	LoginURL      string
+	LoginUser     string
+	LoginPass     string
+	DeepScan      bool
 	Sink          func(CollectedImage) `json:"-"`
 }
 
@@ -143,25 +148,25 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		cfg.MaxBytes = 40 << 20
 	}
 
-	client := &http.Client{
-		Timeout: 25 * time.Second,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 8 {
-				return fmt.Errorf("too many redirects")
-			}
-			return nil
-		},
+	qsize := 8192
+	if cfg.DeepScan {
+		qsize = 131072
+	}
+	client := newCrawlClient()
+	if u, err := url.Parse(start.Scheme + "://" + start.Host + "/"); err == nil {
+		setCookieHeader(client.Jar, u, cfg.Cookies)
 	}
 	robots := newRobotsCache(client)
 	stats := &Stats{}
 	originHost := canonicalHost(start)
+	homeURL := start.Scheme + "://" + start.Host + "/"
 
 	var (
 		mu        sync.Mutex
 		visited   = map[string]bool{}
 		savedPath = map[string]string{}
 		manifest  []ManifestEntry
-		queue     = make(chan job, 4096)
+		queue     = make(chan job, qsize)
 		wg        sync.WaitGroup
 		pagesLeft = int64(cfg.MaxPages)
 		delay     = time.Duration(cfg.DelayMs) * time.Millisecond
@@ -199,38 +204,20 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 				mu.Unlock()
 			}
 			wg.Add(1)
-			select {
-			case queue <- j:
-			case <-ctx.Done():
+			if !sendJob(ctx, queue, j, cfg.DeepScan) {
 				unmark()
 				wg.Done()
-			default:
-				select {
-				case queue <- j:
-				case <-time.After(2 * time.Second):
-					unmark()
-					wg.Done()
+				if !cfg.DeepScan {
 					log("warn", "queue full, dropped "+j.url)
-				case <-ctx.Done():
-					unmark()
-					wg.Done()
 				}
 			}
 			return
 		}
 		wg.Add(1)
-		select {
-		case queue <- j:
-		case <-ctx.Done():
+		if !sendJob(ctx, queue, j, cfg.DeepScan) {
 			wg.Done()
-		default:
-			select {
-			case queue <- j:
-			case <-time.After(2 * time.Second):
-				wg.Done()
+			if !cfg.DeepScan {
 				log("warn", "queue full, dropped "+j.url)
-			case <-ctx.Done():
-				wg.Done()
 			}
 		}
 	}
@@ -293,39 +280,58 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		log("save", filepath.Base(written)+" ← "+hit.Via+mark)
 	}
 
-	fetch := func(raw string) ([]byte, string, *url.URL, error) {
+	fetch := func(raw, referer, dest string) ([]byte, string, *url.URL, error) {
 		if delay > 0 {
 			time.Sleep(delay)
 		}
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
-		if err != nil {
-			return nil, "", nil, err
-		}
-		req.Header.Set("User-Agent", userAgent)
-		req.Header.Set("Accept", "*/*")
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, "", nil, err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
+		try := func(ref string) ([]byte, string, *url.URL, int, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, raw, nil)
+			if err != nil {
+				return nil, "", nil, 0, err
+			}
+			applyBrowserHeaders(req, ref, dest)
+			resp, err := client.Do(req)
+			if err != nil {
+				return nil, "", nil, 0, err
+			}
+			defer resp.Body.Close()
 			final := resp.Request.URL
-			return nil, "", final, fmt.Errorf("HTTP %d", resp.StatusCode)
+			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+				io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
+				return nil, "", final, resp.StatusCode, fmt.Errorf("HTTP %d", resp.StatusCode)
+			}
+			limited := io.LimitReader(resp.Body, cfg.MaxBytes+1)
+			body, err := io.ReadAll(limited)
+			if err != nil {
+				return nil, "", final, resp.StatusCode, err
+			}
+			if int64(len(body)) > cfg.MaxBytes {
+				return nil, "", final, resp.StatusCode, fmt.Errorf("response too large")
+			}
+			ct := resp.Header.Get("Content-Type")
+			if i := strings.Index(ct, ";"); i >= 0 {
+				ct = ct[:i]
+			}
+			return body, strings.TrimSpace(strings.ToLower(ct)), final, resp.StatusCode, nil
 		}
-		limited := io.LimitReader(resp.Body, cfg.MaxBytes+1)
-		body, err := io.ReadAll(limited)
-		if err != nil {
-			return nil, "", resp.Request.URL, err
+		ref := referer
+		if ref == "" {
+			ref = homeURL
 		}
-		if int64(len(body)) > cfg.MaxBytes {
-			return nil, "", resp.Request.URL, fmt.Errorf("response too large")
+		body, ct, final, code, err := try(ref)
+		if err != nil && (code == 403 || code == 401) {
+			retryRef := homeURL
+			if ref == homeURL && start != nil {
+				retryRef = start.String()
+			}
+			if retryRef != ref {
+				body, ct, final, code, err = try(retryRef)
+			}
+			if err != nil && (code == 403 || code == 401) {
+				return nil, "", final, errForbidden
+			}
 		}
-		ct := resp.Header.Get("Content-Type")
-		if i := strings.Index(ct, ";"); i >= 0 {
-			ct = ct[:i]
-		}
-		return body, strings.TrimSpace(strings.ToLower(ct)), resp.Request.URL, nil
+		return body, ct, final, err
 	}
 
 	handleImageHit := func(img ImageHit, depth int) {
@@ -352,8 +358,13 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 
 	process := func(j job) {
 		if j.kind == jobImage {
-			body, ct, final, err := fetch(j.url)
+			body, ct, final, err := fetch(j.url, j.page, "image")
 			if err != nil {
+				if isSoftMiss(err, j.via) {
+					stats.Skipped.Add(1)
+					log("skip", j.url+" ("+err.Error()+")")
+					return
+				}
 				stats.Errors.Add(1)
 				log("error", "download "+j.url+": "+err.Error())
 				return
@@ -379,9 +390,14 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 			}
 		}
 
-		body, ct, final, err := fetch(j.url)
+		body, ct, final, err := fetch(j.url, j.page, "document")
 		if err != nil {
 			if j.kind == jobSitemap && (j.via == "default-sitemap" || strings.Contains(err.Error(), "HTTP 404")) {
+				return
+			}
+			if isSoftMiss(err, j.via) {
+				stats.Skipped.Add(1)
+				log("skip", j.url+" ("+err.Error()+")")
 				return
 			}
 			stats.Errors.Add(1)
@@ -455,6 +471,16 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 					enqueue(job{kind: jobPage, url: p.URL, depth: j.depth + 1, via: p.Via, page: pageURL.String()})
 				}
 			}
+			if isLoginPath(pageURL.Path) {
+				home := *pageURL
+				home.Path = "/"
+				home.RawQuery = ""
+				home.Fragment = ""
+				enqueue(job{kind: jobPage, url: home.String(), depth: 0, via: "after-login", page: pageURL.String()})
+				for _, sj := range folderSeeds(pageURL, cfg.DeepScan) {
+					enqueue(sj)
+				}
+			}
 		case jobStyle:
 			if !cfg.ParseCSS {
 				return
@@ -518,8 +544,22 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 		enqueue(job{kind: jobSitemap, url: start.Scheme + "://" + start.Host + "/sitemap.xml", depth: 0, via: "default-sitemap", page: start.String()})
 	}
 
+	if cfg.Cookies != "" {
+		log("info", "using session cookies")
+	}
+	doLogin(ctx, client, cfg, log)
 	log("info", "starting at "+start.String())
 	enqueue(job{kind: jobPage, url: start.String(), depth: 0, via: "start", page: start.String()})
+	if isLoginPath(start.Path) {
+		root := *start
+		root.Path = "/"
+		root.RawQuery = ""
+		root.Fragment = ""
+		enqueue(job{kind: jobPage, url: root.String(), depth: 0, via: "after-login", page: start.String()})
+	}
+	for _, sj := range folderSeeds(start, cfg.DeepScan) {
+		enqueue(sj)
+	}
 
 	done := make(chan struct{})
 	go func() {
@@ -601,4 +641,30 @@ func isImageContent(ct string, body []byte) bool {
 	}
 	trim := strings.TrimSpace(string(body[:min(256, len(body))]))
 	return strings.HasPrefix(trim, "<svg") || (strings.HasPrefix(trim, "<?xml") && strings.Contains(strings.ToLower(trim), "svg"))
+}
+
+func sendJob(ctx context.Context, queue chan job, j job, block bool) bool {
+	if block {
+		select {
+		case queue <- j:
+			return true
+		case <-ctx.Done():
+			return false
+		}
+	}
+	select {
+	case queue <- j:
+		return true
+	case <-ctx.Done():
+		return false
+	default:
+		select {
+		case queue <- j:
+			return true
+		case <-time.After(2 * time.Second):
+			return false
+		case <-ctx.Done():
+			return false
+		}
+	}
 }

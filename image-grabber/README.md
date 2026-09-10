@@ -30,6 +30,14 @@ Unlock those limits with the admin password **`batata`**:
 - In the UI: Admin password → **Unlock limits**
 - CLI: `-admin-password batata`
 
+Unlocked admin crawl also:
+
+- Seeds `/users/`, `/media/`, `/uploads/` and other public folders
+- Continues from a login page into the rest of the site
+- Accepts **session cookies** (or a login form you have access to)
+- Uses a browser User-Agent and Referer so hotlink/WAF **403** responses are retried, then skipped instead of failing the run
+- Never drops jobs with `queue full`
+
 You can override the password with the `GRABBER_ADMIN_PASSWORD` environment variable.
 
 ## Run the .exe (Windows)

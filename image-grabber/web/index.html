@@ -26,11 +26,12 @@
     .sub { color: var(--muted); margin-bottom: 28px; }
     .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
     label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
-    input[type=text], input[type=number] {
+    input[type=text], input[type=number], input[type=password], textarea {
       width: 100%; background: #0e1014; color: var(--ink); border: 1px solid var(--line);
       border-radius: 8px; padding: 10px 12px; font: inherit;
     }
-    input[type=text]:focus, input[type=number]:focus { outline: 2px solid var(--accent-dim); border-color: var(--accent); }
+    input[type=text]:focus, input[type=number]:focus, input[type=password]:focus, textarea:focus { outline: 2px solid var(--accent-dim); border-color: var(--accent); }
+    textarea { min-height: 64px; resize: vertical; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-top: 14px; }
     .checks label { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--ink); display: flex; gap: 8px; align-items: center; cursor: pointer; }
@@ -142,6 +143,29 @@
         <button id="unlock" type="button">Unlock limits</button>
       </div>
       <p class="lock" id="lockStatus">Limits locked — same site, robots.txt, depth 4, 500 pages.</p>
+      <div id="adminExtra" style="display:none">
+        <div class="row">
+          <div>
+            <label for="loginUrl">Login page URL (optional)</label>
+            <input id="loginUrl" type="text" placeholder="https://example.com/login" />
+          </div>
+          <div class="row" style="margin-top:0; grid-template-columns: 1fr 1fr;">
+            <div>
+              <label for="loginUser">Username</label>
+              <input id="loginUser" type="text" autocomplete="username" />
+            </div>
+            <div>
+              <label for="loginPass">Password</label>
+              <input id="loginPass" type="password" autocomplete="current-password" />
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label for="cookies">Session cookies after login</label>
+          <textarea id="cookies" placeholder="sessionid=...; csrftoken=..."></textarea>
+        </div>
+        <p class="note">Admin crawl seeds /users/, /media/, /uploads/ and the rest of the public folders, then continues past the login page using your session. It does not break into admin panels or bypass other people’s access.</p>
+      </div>
     </div>
 
     <div class="stats">
@@ -225,9 +249,10 @@
       pagesEl.max = on ? 50000 : 500;
       delayEl.min = on ? 0 : 80;
       document.getElementById('lockStatus').textContent = on
-        ? 'Testing mode unlocked — off-site crawl, robots ignore, and higher limits are available.'
+        ? 'Testing mode unlocked — folders, users, session crawl, no queue drops.'
         : 'Limits locked — same site, robots.txt, depth 4, 500 pages.';
       document.getElementById('lockStatus').classList.toggle('on', on);
+      document.getElementById('adminExtra').style.display = on ? 'block' : 'none';
       document.querySelectorAll('.bound').forEach((el) => el.classList.toggle('locked-ctl', !on));
       if (!on) {
         same.checked = true;
@@ -304,7 +329,11 @@
         saveDataUri: document.getElementById('datauri').checked,
         respectRobots: document.getElementById('robots').checked,
         delayMs: Number(document.getElementById('delay').value),
-        password: document.getElementById('adminPass').value
+        password: document.getElementById('adminPass').value,
+        cookies: document.getElementById('cookies').value.trim(),
+        loginUrl: document.getElementById('loginUrl').value.trim(),
+        loginUser: document.getElementById('loginUser').value.trim(),
+        loginPass: document.getElementById('loginPass').value
       };
       const res = await fetch('/api/start', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
       if (!res.ok) {
@@ -323,7 +352,7 @@
         return;
       }
       applyLock(true);
-      line('info', 'Admin testing limits unlocked.');
+      line('info', 'Admin testing limits unlocked. Session, users, and folder crawl are on.');
     };
 
     async function saveImages(ids) {

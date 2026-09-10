@@ -38,6 +38,9 @@ func TestApplyBoundsUnlocksWithAdmin(t *testing.T) {
 	if cfg.MaxDepth != 12 || cfg.MaxPages != 2000 {
 		t.Fatalf("admin mode should keep requested limits: %+v", cfg)
 	}
+	if !cfg.DeepScan {
+		t.Fatal("admin mode should enable deep folder/user scan")
+	}
 }
 
 func TestPasswordOK(t *testing.T) {

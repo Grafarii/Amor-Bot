@@ -171,3 +171,72 @@ func TestPreviewSinkDoesNotWriteFiles(t *testing.T) {
 		t.Fatalf("expected collected images, got %d", n)
 	}
 }
+
+func TestForbiddenIsSkippedNotError(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><img src="/ok.png"><img src="/denied.png"></body></html>`))
+	})
+	mux.HandleFunc("/ok.png", func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("User-Agent"), "Chrome") {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	})
+	mux.HandleFunc("/denied.png", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><h1>Index of /users/</h1><img src="/users/avatar.png" data-avatar="/users/avatar.png"></body></html>`))
+	})
+	mux.HandleFunc("/users/avatar.png", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	})
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	stats, err := Run(ctx, cfg, func(string, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Errors.Load() != 0 {
+		t.Fatalf("HTTP 403 should be skipped, not an error; errors=%d skipped=%d", stats.Errors.Load(), stats.Skipped.Load())
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	if !strings.Contains(joined, "ok.png") {
+		t.Fatalf("missing ok.png (browser UA / referer). got %s", joined)
+	}
+	if !strings.Contains(joined, "avatar.png") {
+		t.Fatalf("missing users avatar. got %s", joined)
+	}
+}
