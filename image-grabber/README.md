@@ -38,7 +38,9 @@ Unlocked studio also:
 - Accepts **session cookies** (or a login form you already use) so it can fetch the same pages you can after sign-in
 - Sends a current Chrome identity (User-Agent, Client Hints, Sec-Fetch-*) so hotlink checks see a real browser
 - Sets **Sec-Fetch-Site** correctly for CDN / cross-host files instead of always claiming same-origin
-- On **403 / 401**, retries with the page Referer, the site origin, no Referer, a cookie from the challenge, and Origin — then skips a true denial instead of failing the run
+- On **403 / 401**, retries with the page Referer, the site origin, no Referer, a cookie from the challenge, and Origin
+- If the 403 body is still the page or an image, Lumina **keeps walking** — it does not stop the collection
+- A true empty denial is skipped quietly and does not burn the page budget
 - Never drops jobs with `queue full`
 
 Override the key with `GRABBER_ADMIN_PASSWORD`.

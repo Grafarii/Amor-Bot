@@ -367,6 +367,9 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 
 		body, ct, final, err := fetch(j.url, j.page, "document")
 		if err != nil {
+			if j.kind == jobPage {
+				atomic.AddInt64(&pagesLeft, 1)
+			}
 			noteMiss(j, err, j.url+": "+err.Error())
 			return
 		}

@@ -172,3 +172,152 @@ func TestCrawlCollectsHotlinkProtectedCDN(t *testing.T) {
 		t.Fatalf("collected a permanently forbidden file: %s", joined)
 	}
 }
+
+func TestCrawlReads403HTMLAndKeepsWalking(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(`<html><body><img src="/hero.png"><a href="/album/">album</a></body></html>`))
+	})
+	mux.HandleFunc("/album/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><img src="/shot.png"></body></html>`))
+	})
+	servePNG := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	}
+	mux.HandleFunc("/hero.png", servePNG)
+	mux.HandleFunc("/shot.png", servePNG)
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Concurrency = 1
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	stats, err := Run(ctx, cfg, func(string, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.Errors.Load() != 0 {
+		t.Fatalf("403 html must not stop the walk with errors=%d", stats.Errors.Load())
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	if !strings.Contains(joined, "hero.png") || !strings.Contains(joined, "shot.png") {
+		t.Fatalf("expected walk to continue past 403 html, got %s", joined)
+	}
+}
+
+func Test403ImageBodyIsCollected(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(`<html><body><img src="/hot.png"></body></html>`))
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write(pngDot)
+	}))
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(string, string) {}); err != nil {
+		t.Fatal(err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if len(got) < 1 {
+		t.Fatal("expected 403 image body to be collected")
+	}
+}
+
+func TestForbiddenPagesDoNotBurnPageBudget(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><a href="/wall">wall</a><a href="/good">good</a></body></html>`))
+	})
+	mux.HandleFunc("/wall", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+	mux.HandleFunc("/good", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<html><body><img src="/kept.png"></body></html>`))
+	})
+	mux.HandleFunc("/kept.png", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(pngDot)
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var got []CollectedImage
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.MaxPages = 2
+	cfg.MaxDepth = 2
+	cfg.DelayMs = 0
+	cfg.Concurrency = 1
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Sink = func(img CollectedImage) {
+		mu.Lock()
+		got = append(got, img)
+		mu.Unlock()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(string, string) {}); err != nil {
+		t.Fatal(err)
+	}
+	joined := ""
+	mu.Lock()
+	for _, img := range got {
+		joined += img.URL + " "
+	}
+	mu.Unlock()
+	if !strings.Contains(joined, "kept.png") {
+		t.Fatalf("403 page burned the page budget; missing kept.png in %s", joined)
+	}
+}

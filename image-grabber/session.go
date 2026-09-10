@@ -265,15 +265,10 @@ func getURL(ctx context.Context, client *http.Client, raw, referer, dest string,
 	}
 	defer resp.Body.Close()
 	final := resp.Request.URL
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
-		return nil, "", final, resp.StatusCode, fmt.Errorf("HTTP %d", resp.StatusCode)
-	}
 	if maxBytes <= 0 {
 		maxBytes = 80 << 20
 	}
-	limited := io.LimitReader(resp.Body, maxBytes+1)
-	body, err := io.ReadAll(limited)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxBytes+1))
 	if err != nil {
 		return nil, "", final, resp.StatusCode, err
 	}
@@ -284,7 +279,43 @@ func getURL(ctx context.Context, client *http.Client, raw, referer, dest string,
 	if i := strings.Index(ct, ";"); i >= 0 {
 		ct = ct[:i]
 	}
-	return body, strings.TrimSpace(strings.ToLower(ct)), final, resp.StatusCode, nil
+	ct = strings.TrimSpace(strings.ToLower(ct))
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return body, ct, final, resp.StatusCode, nil
+	}
+	if bodyUsable(resp.StatusCode, ct, body) {
+		return body, ct, final, resp.StatusCode, nil
+	}
+	return nil, ct, final, resp.StatusCode, fmt.Errorf("HTTP %d", resp.StatusCode)
+}
+
+func bodyUsable(code int, ct string, body []byte) bool {
+	if len(body) == 0 {
+		return false
+	}
+	switch code {
+	case 401, 403, 404, 410:
+	default:
+		return false
+	}
+	if isMediaContent(ct, body) {
+		return true
+	}
+	c := strings.ToLower(ct)
+	if strings.Contains(c, "css") || strings.Contains(c, "javascript") || strings.Contains(c, "json") || strings.Contains(c, "xml") {
+		return len(body) > 8
+	}
+	s := strings.ToLower(string(body))
+	if strings.Contains(s, "<img") || strings.Contains(s, "<source") || strings.Contains(s, "<video") ||
+		strings.Contains(s, "<picture") || strings.Contains(s, "srcset") || strings.Contains(s, "data-src") {
+		return true
+	}
+	if strings.Contains(c, "html") || strings.Contains(s, "<html") || strings.Contains(s, "<!doctype") {
+		if strings.Contains(s, "href=") || strings.Contains(s, "stylesheet") || strings.Contains(s, "<script") {
+			return len(body) > 64
+		}
+	}
+	return false
 }
 
 func hotlinkReferers(page, raw, home string) []string {
