@@ -292,15 +292,11 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 	}
 
 	noteMiss := func(j job, err error, errLine string) {
-		if isSoftMiss(err, j.via) {
-			stats.Skipped.Add(1)
-			if !isQuietMiss(err, j.kind, j.via) {
-				log("skip", j.url+" ("+err.Error()+")")
-			}
+		stats.Skipped.Add(1)
+		if isQuietMiss(err, j.kind, j.via) {
 			return
 		}
-		stats.Errors.Add(1)
-		log("error", errLine)
+		log("skip", errLine)
 	}
 
 	fetch := func(raw, referer, dest string) ([]byte, string, *url.URL, error) {

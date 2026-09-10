@@ -205,19 +205,20 @@ func isSoftMiss(err error, via string) bool {
 	if err == nil {
 		return false
 	}
-	if errors.Is(err, errForbidden) {
+	if errors.Is(err, errForbidden) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return true
 	}
-	code := httpStatusFromErr(err)
-	switch code {
-	case 401, 403, 404, 405, 406, 408, 410, 429, 451:
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "http ") {
 		return true
 	}
-	msg := err.Error()
-	if strings.Contains(msg, "HTTP 403") || strings.Contains(msg, "HTTP 401") {
+	if strings.Contains(msg, "timeout") || strings.Contains(msg, "connection") ||
+		strings.Contains(msg, "tls") || strings.Contains(msg, "eof") ||
+		strings.Contains(msg, "reset") || strings.Contains(msg, "refused") {
 		return true
 	}
-	return strings.Contains(msg, "HTTP 404") && (via == "default-sitemap" || via == "robots-sitemap")
+	_ = via
+	return true
 }
 
 func httpStatusFromErr(err error) int {
@@ -233,24 +234,25 @@ func httpStatusFromErr(err error) int {
 }
 
 func isQuietMiss(err error, kind jobKind, via string) bool {
-	if !isSoftMiss(err, via) {
+	if err == nil {
 		return false
 	}
 	code := httpStatusFromErr(err)
-	if errors.Is(err, errForbidden) || code == 401 || code == 403 {
+	if errors.Is(err, errForbidden) || code == 401 || code == 403 || code == 404 || code == 410 || code == 429 {
 		return true
 	}
-	if code == 404 || strings.Contains(err.Error(), "HTTP 404") {
-		switch kind {
-		case jobStyle, jobScript, jobSitemap, jobManifest:
-			return true
-		}
-		switch via {
-		case "default-sitemap", "robots-sitemap", "stylesheet", "script-src":
-			return true
-		}
+	if code >= 400 {
+		return true
 	}
-	return false
+	switch kind {
+	case jobStyle, jobScript, jobSitemap, jobManifest:
+		return true
+	}
+	switch via {
+	case "default-sitemap", "robots-sitemap", "stylesheet", "script-src":
+		return true
+	}
+	return strings.Contains(strings.ToLower(err.Error()), "http ")
 }
 
 func getURL(ctx context.Context, client *http.Client, raw, referer, dest string, withOrigin bool, maxBytes int64) ([]byte, string, *url.URL, int, error) {
@@ -293,10 +295,8 @@ func bodyUsable(code int, ct string, body []byte) bool {
 	if len(body) == 0 {
 		return false
 	}
-	switch code {
-	case 401, 403, 404, 410:
-	default:
-		return false
+	if code < 400 {
+		return true
 	}
 	if isMediaContent(ct, body) {
 		return true
@@ -395,7 +395,14 @@ func getURLForgiving(ctx context.Context, client *http.Client, raw, page, dest, 
 		if err == nil {
 			return body, ct, final, nil
 		}
-		if code != http.StatusForbidden && code != http.StatusUnauthorized {
+		if code == http.StatusTooManyRequests || code == http.StatusServiceUnavailable {
+			body, ct, final, code, err = getURL(ctx, client, raw, a.referer, a.dest, a.withOrigin, maxBytes)
+			lastFinal, lastErr, lastCode = final, err, code
+			if err == nil {
+				return body, ct, final, nil
+			}
+		}
+		if code != http.StatusForbidden && code != http.StatusUnauthorized && code != http.StatusTooManyRequests && code != http.StatusServiceUnavailable {
 			return body, ct, final, err
 		}
 		// Same headers once more so a Set-Cookie from the 403 can pass.
