@@ -79,6 +79,68 @@ func TestNeverDropQueueFollowsLiveAtomic(t *testing.T) {
 	}
 }
 
+func TestLockedCrawlCanLogQueueFull(t *testing.T) {
+	oldCap := safeQueueCap
+	oldWait := queueOfferWait
+	safeQueueCap = 2
+	queueOfferWait = 0
+	t.Cleanup(func() {
+		safeQueueCap = oldCap
+		queueOfferWait = oldWait
+	})
+
+	var b strings.Builder
+	for i := 0; i < 80; i++ {
+		fmt.Fprintf(&b, `<img src="/img-%d.png">`, i)
+	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/img-") && strings.HasSuffix(r.URL.Path, ".png") {
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(pngDot)
+			return
+		}
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte("<html><body>" + b.String() + "</body></html>"))
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	var logs []string
+	var mu sync.Mutex
+	cfg := defaultConfig()
+	cfg.StartURL = srv.URL + "/"
+	cfg.DelayMs = 0
+	cfg.RespectRobots = false
+	cfg.ParseSitemap = false
+	cfg.Concurrency = 1
+	cfg.MaxPages = 2
+	cfg.DeepScan = false
+	cfg.Sink = func(CollectedImage) {}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if _, err := Run(ctx, cfg, func(kind, msg string) {
+		mu.Lock()
+		logs = append(logs, kind+" "+msg)
+		mu.Unlock()
+	}); err != nil {
+		t.Fatal(err)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	for _, line := range logs {
+		if strings.Contains(line, "queue full") {
+			return
+		}
+	}
+	t.Fatal("safe mode should log queue full when the cap is tiny")
+}
+
 func TestUnlockedCrawlDoesNotLogQueueFull(t *testing.T) {
 	oldCap := safeQueueCap
 	safeQueueCap = 8

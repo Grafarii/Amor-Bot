@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -61,17 +62,13 @@ func (q *jobQueue) Push(ctx context.Context, j job, neverDrop func() bool) bool 
 			return false
 		}
 
-		timedOut := false
+		var timedOut atomic.Bool
 		timer := time.AfterFunc(queueOfferWait, func() {
-			q.mu.Lock()
-			timedOut = true
+			timedOut.Store(true)
 			q.cond.Broadcast()
-			q.mu.Unlock()
 		})
 		stop := context.AfterFunc(ctx, func() {
-			q.mu.Lock()
 			q.cond.Broadcast()
-			q.mu.Unlock()
 		})
 		q.cond.Wait()
 		timer.Stop()
@@ -85,7 +82,7 @@ func (q *jobQueue) Push(ctx context.Context, j job, neverDrop func() bool) bool 
 			q.cond.Signal()
 			return true
 		}
-		if timedOut {
+		if timedOut.Load() {
 			return false
 		}
 	}
