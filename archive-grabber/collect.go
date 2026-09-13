@@ -72,7 +72,7 @@ func defaultConfig() Config {
 }
 
 func newArchiveClient() *http.Client {
-	return &http.Client{Timeout: 30 * time.Second}
+	return &http.Client{Timeout: 75 * time.Second}
 }
 
 func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
@@ -254,8 +254,12 @@ func Run(ctx context.Context, cfg Config, log LogFn) (*Stats, error) {
 	}
 
 	collectIndex("archived images", []string{"mimetype:image/.*"}, cfg.MaxImages)
-	collectIndex("archived video", []string{"mimetype:video/.*"}, min(400, cfg.MaxImages))
-	collectIndex("files with media names", []string{extFilter}, cfg.MaxImages)
+	if atomic.LoadInt64(&left) > 0 {
+		collectIndex("archived video", []string{"mimetype:video/.*"}, min(400, cfg.MaxImages))
+	}
+	if atomic.LoadInt64(&left) > 0 {
+		collectIndex("files with media names", []string{extFilter}, cfg.MaxImages)
+	}
 
 	if cfg.ScanHTML && ctx.Err() == nil {
 		pace()

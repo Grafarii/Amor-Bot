@@ -75,9 +75,9 @@ func queryCDX(ctx context.Context, client *http.Client, cdxBase, target, matchTy
 	endpoint := strings.TrimRight(cdxBase, "/") + "?" + q.Encode()
 
 	var lastErr error
-	for attempt := 0; attempt < 4; attempt++ {
+	for attempt := 0; attempt < 2; attempt++ {
 		if attempt > 0 {
-			wait := time.Duration(attempt*attempt) * 1500 * time.Millisecond
+			wait := time.Duration(attempt) * 2 * time.Second
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
@@ -185,11 +185,11 @@ func siteQuery(start *url.URL) (target, matchType string) {
 		return start.String(), "prefix"
 	}
 	path := start.Path
-	if path == "" || path == "/" {
-		return host, "domain"
-	}
 	if strings.HasSuffix(path, "*") {
-		return host + path, "prefix"
+		path = strings.TrimSuffix(path, "*")
+	}
+	if path == "" || path == "/" {
+		return host + "/", "prefix"
 	}
 	if !strings.HasSuffix(path, "/") {
 		path += "/"

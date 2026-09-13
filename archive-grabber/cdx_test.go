@@ -48,7 +48,7 @@ func TestSiteQuery(t *testing.T) {
 	}
 	root, _ := url.Parse("https://www.Example.com/")
 	target, match = siteQuery(root)
-	if target != "example.com" || match != "domain" {
+	if target != "example.com/" || match != "prefix" {
 		t.Fatalf("root got %s %s", target, match)
 	}
 }
