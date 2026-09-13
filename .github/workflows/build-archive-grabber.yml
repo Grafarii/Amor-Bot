@@ -1,0 +1,37 @@
+name: Build Archive Image Grabber
+
+on:
+  push:
+    paths:
+      - "archive-grabber/**"
+      - ".github/workflows/build-archive-grabber.yml"
+  pull_request:
+    paths:
+      - "archive-grabber/**"
+      - ".github/workflows/build-archive-grabber.yml"
+
+jobs:
+  windows-exe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Test
+        working-directory: archive-grabber
+        run: go test ./...
+      - name: Build Windows exe
+        working-directory: archive-grabber
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+          go build -ldflags="-s -w" -o dist/ArchiveImageGrabber.exe .
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArchiveImageGrabber-windows
+          path: archive-grabber/dist/ArchiveImageGrabber.exe

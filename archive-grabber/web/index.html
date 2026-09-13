@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lumina Archive</title>
+  <style>
+    :root { --bg:#0c0a08; --panel:#181410; --ink:#f4efe6; --muted:#9a9084; --line:#3a322b; --copper:#c9a36a; --ok:#b7d7b0; --err:#e08b7a; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--ink); font:15px/1.5 "Segoe UI", system-ui, sans-serif; }
+    body { min-height:100vh; background-image: radial-gradient(900px 420px at 8% -8%, rgba(201,163,106,.11), transparent 55%); }
+    .wrap { max-width:1100px; margin:0 auto; padding:36px 24px 72px; }
+    .wordmark { font-family: Palatino, Georgia, serif; letter-spacing:.22em; text-transform:uppercase; font-size:1.5rem; margin:0; }
+    .wordmark span { color:var(--copper); }
+    .mark { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--copper); }
+    header { display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:22px; }
+    .lede { font-family: Palatino, Georgia, serif; font-style:italic; font-size:1.25rem; margin:0 0 24px; max-width:36rem; }
+    .panel { background:var(--panel); border:1px solid var(--line); padding:22px; margin-bottom:16px; }
+    label { display:block; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    input[type=text], input[type=number] { width:100%; background:#14110e; color:var(--ink); border:1px solid var(--line); padding:11px 13px; font:inherit; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    .checks { margin-top:14px; }
+    .checks label { text-transform:none; letter-spacing:0; font-size:14px; color:var(--ink); display:flex; gap:8px; align-items:center; }
+    button { border:0; padding:12px 20px; letter-spacing:.12em; text-transform:uppercase; font:600 12px inherit; cursor:pointer; }
+    .go { background:var(--copper); color:#1a140c; }
+    .go:disabled { opacity:.45; }
+    .stop { background:#3a2420; color:#f0c8bc; }
+    .quit { background:transparent; color:var(--muted); border:1px solid var(--line); }
+    .saveb { background:#243028; color:var(--ok); }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:14px; }
+    .stat { background:var(--panel); padding:14px; text-align:center; }
+    .stat b { display:block; font-family:Palatino,Georgia,serif; font-size:1.4rem; }
+    .stat span { color:var(--muted); font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
+    #log { height:130px; overflow:auto; background:#090807; border:1px solid var(--line); padding:12px; font:12px/1.5 ui-monospace,Consolas,monospace; margin-bottom:22px; color:#cfc6ba; }
+    .k-error { color:var(--err); } .k-found,.k-save { color:var(--ok); } .k-scan { color:var(--copper); }
+    .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+    .card { background:var(--panel); border:1px solid var(--line); cursor:pointer; }
+    .card.sel { border-color:var(--copper); }
+    .card img, .card video { width:100%; height:150px; object-fit:contain; background:#090807; display:block; }
+    .card .meta { padding:10px; font-size:11px; color:var(--muted); }
+    .card .meta b { color:var(--ink); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .empty { color:var(--muted); padding:40px 8px; text-align:center; border:1px dashed var(--line); font-family:Palatino,Georgia,serif; font-style:italic; }
+    .note { color:var(--muted); font-size:12.5px; margin-top:12px; }
+    @media (max-width:700px) { .row,.stats { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 class="wordmark">Lu<span>mina</span></h1>
+      <div class="mark">Wayback collection</div>
+    </header>
+    <p class="lede">Every image the Wayback Machine kept for a site.</p>
+    <div class="panel">
+      <label for="url">The site</label>
+      <input id="url" type="text" placeholder="https://example.com/" />
+      <div class="row">
+        <div><label for="out">Collection folder</label><input id="out" type="text" /></div>
+        <div><label for="max">Max images</label><input id="max" type="number" min="1" max="5000" value="800" /></div>
+      </div>
+      <div class="row">
+        <div><label for="pages">Archived HTML pages</label><input id="pages" type="number" min="1" max="400" value="40" /></div>
+        <div><label for="delay">Delay between Archive requests (ms)</label><input id="delay" type="number" min="0" max="5000" value="160" /></div>
+      </div>
+      <div class="checks">
+        <label><input id="html" type="checkbox" checked /> Also read archived HTML pages for buried images</label>
+      </div>
+      <div class="btns">
+        <button class="go" id="start" type="button">Collect from archive</button>
+        <button class="stop" id="stop" type="button">Stop</button>
+        <button class="quit" id="quit" type="button">Quit</button>
+      </div>
+      <p class="note">Uses the public Internet Archive CDX index and snapshot files. For sites you own or have permission to copy. It does not break into live admin panels.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sPages">0</b><span>Pages</span></div>
+      <div class="stat"><b id="sFound">0</b><span>Found</span></div>
+      <div class="stat"><b id="sSaved">0</b><span>On disk</span></div>
+      <div class="stat"><b id="sErrors">0</b><span>Errors</span></div>
+    </div>
+    <div id="log"></div>
+    <div style="display:flex; justify-content:space-between; align-items:end; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+      <h2 style="font-family:Palatino,Georgia,serif; font-weight:500; margin:0;">Collection <span id="gCount" style="color:var(--copper);">0</span></h2>
+      <div class="btns" style="margin:0">
+        <button class="saveb" id="saveSel" type="button">Save selected</button>
+        <button class="saveb" id="saveAll" type="button">Save all</button>
+      </div>
+    </div>
+    <div id="gallery" class="gallery"><div class="empty" id="gEmpty">The archive collection fills here.</div></div>
+  </div>
+  <script>
+    const logEl = document.getElementById('log');
+    const startBtn = document.getElementById('start');
+    let found=0, saved=0, pages=0, errors=0;
+    const selected = new Set();
+    fetch('/api/defaults').then(r=>r.json()).then(d => { document.getElementById('out').value = d.outDir || 'archived-images'; });
+    const ev = new EventSource('/api/events');
+    ev.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'log') {
+        if (msg.kind === 'page') pages++;
+        if (msg.kind === 'found') found++;
+        if (msg.kind === 'error') errors++;
+        paint();
+        line(msg.kind, '['+msg.at+'] '+msg.msg);
+      } else if (msg.type === 'image') {
+        addCard(msg);
+      } else if (msg.type === 'error') {
+        line('error', msg.msg); startBtn.disabled = false;
+      } else if (msg.type === 'done') {
+        startBtn.disabled = false;
+        if (msg.ok) { pages=msg.pages; found=msg.found; errors=msg.errors; paint(); line('info','Collection complete. Nothing saved until you choose.'); }
+      }
+    };
+    function paint(){ sPages.textContent=pages; sFound.textContent=found; sSaved.textContent=saved; sErrors.textContent=errors; }
+    function line(kind, text){ const d=document.createElement('div'); d.className='k-'+kind; d.textContent=text; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; }
+    function addCard(img){
+      const empty=document.getElementById('gEmpty'); if(empty) empty.remove();
+      const card=document.createElement('div'); card.className='card sel'; card.dataset.id=String(img.id); selected.add(img.id);
+      const pic=document.createElement(/^(video\/)/i.test(img.contentType||'')?'video':'img');
+      pic.src=img.preview; pic.alt=img.name||img.url;
+      const meta=document.createElement('div'); meta.className='meta';
+      const t=document.createElement('b'); t.textContent=(img.name||'').split('/').pop()||img.url;
+      const v=document.createElement('div'); v.textContent=img.via;
+      meta.append(t,v); card.append(pic,meta);
+      card.onclick=()=>{ if(selected.has(img.id)){selected.delete(img.id);card.classList.remove('sel');} else {selected.add(img.id);card.classList.add('sel');} };
+      gallery.appendChild(card); gCount.textContent=String(gallery.querySelectorAll('.card').length);
+    }
+    startBtn.onclick = async () => {
+      found=saved=pages=errors=0; paint(); logEl.textContent=''; gallery.innerHTML='<div class="empty" id="gEmpty">The archive collection fills here.</div>'; gCount.textContent='0'; selected.clear();
+      startBtn.disabled=true;
+      const res = await fetch('/api/start', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+        url: document.getElementById('url').value.trim(),
+        outDir: document.getElementById('out').value.trim(),
+        maxImages: Number(document.getElementById('max').value),
+        scanHtml: document.getElementById('html').checked,
+        htmlPages: Number(document.getElementById('pages').value),
+        delayMs: Number(document.getElementById('delay').value)
+      })});
+      if (!res.ok) { startBtn.disabled=false; line('error', await res.text()); }
+    };
+    document.getElementById('stop').onclick = () => fetch('/api/stop', {method:'POST'});
+    document.getElementById('quit').onclick = () => fetch('/api/quit', {method:'POST'});
+    async function saveImages(ids){
+      const res = await fetch('/api/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ outDir: document.getElementById('out').value.trim(), ids })});
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) { line('error','Save failed'); return; }
+      saved = data.saved||0; paint(); line('info','Saved '+saved+' file(s) to '+data.outDir);
+    }
+    document.getElementById('saveSel').onclick = () => saveImages([...selected]);
+    document.getElementById('saveAll').onclick = () => saveImages([]);
+  </script>
+</body>
+</html>
